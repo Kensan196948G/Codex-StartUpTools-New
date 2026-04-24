@@ -82,9 +82,13 @@
   - target module: `scripts/lib/WorktreeManager.psm1`
   - verification: `tests/unit/WorktreeManager.Tests.ps1`
   - migration notes: `docs/migration/config-and-architecture-migration.md`
+- Message bus
+  - target module: `scripts/lib/MessageBus.psm1`
+  - verification: `tests/unit/MessageBus.Tests.ps1`
+  - migration notes: `docs/migration/config-and-architecture-migration.md`
 
 ## 次の候補
 
-1. `MessageBus`
-2. `StatuslineManager`
-3. `SessionTabManager`
+1. `StatuslineManager`
+2. `SessionTabManager`
+3. `LauncherCommon`

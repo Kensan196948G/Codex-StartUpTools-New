@@ -47,3 +47,7 @@
   - 分類: そのまま移植
   - 理由: Git worktree 管理は Codex 側でもそのまま利用価値が高い
   - 検証: `tests/unit/WorktreeManager.Tests.ps1`
+- `scripts/lib/MessageBus.psm1`
+  - 分類: そのまま移植
+  - 理由: state.json ベースの軽量メッセージ連携は Codex 側でも再利用しやすい
+  - 検証: `tests/unit/MessageBus.Tests.ps1`
