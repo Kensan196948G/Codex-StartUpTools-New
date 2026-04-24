@@ -1,0 +1,13 @@
+# Minimal Codex project configuration placeholder.
+
+[project]
+name = "Codex-StartUpTools-New"
+purpose = "Codex-native migration target for startup tools"
+
+[migration]
+source_repo = "D:\\ClaudeCode-StartUpTools-New"
+mode = "incremental"
+
+[verification]
+require_docs = true
+require_tests_for_scripts = true
