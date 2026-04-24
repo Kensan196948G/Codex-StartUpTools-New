@@ -23,6 +23,7 @@
   - adapt default tool and examples for Codex-first operation
 - `docs/codex/*`
   - keep reusable guidance, remove references to disabled launcher paths
+- `scripts/lib/LauncherCommon.psm1`
 
 ### Migrate directly (additional completed slice)
 
@@ -77,8 +78,8 @@
 
 ## Next Migration Queue
 
-1. `LauncherCommon`
-2. `McpHealthCheck`
-3. `state.json` / `state.schema.json` の縮小設計
-4. `Start-*` 系エントリポイントの再構成
-5. `Start-ClaudeOS` 相当の Codex bootstrap 設計
+1. `McpHealthCheck`
+2. `state.json` / `state.schema.json` の縮小設計
+3. `Start-*` 系エントリポイントの再構成
+4. `Start-ClaudeOS` 相当の Codex bootstrap 設計
+5. `CronManager` の要否再評価

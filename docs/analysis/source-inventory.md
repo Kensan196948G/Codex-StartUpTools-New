@@ -59,3 +59,7 @@
   - 分類: 調整して移植
   - 理由: UI 表示ではなく、session.json の状態管理部分を Codex 向けに再利用する
   - 検証: `tests/unit/SessionTabManager.Tests.ps1`
+- `scripts/lib/LauncherCommon.psm1`
+  - 分類: 調整して移植
+  - 理由: 起動共通処理は有用だが、Codex 側では最小責務に分解して残す必要がある
+  - 検証: `tests/unit/LauncherCommon.Tests.ps1`

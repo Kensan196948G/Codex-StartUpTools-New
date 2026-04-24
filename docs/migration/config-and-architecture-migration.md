@@ -19,6 +19,7 @@ Migrate the reusable configuration and architecture guard layers from the Claude
   - `scripts/lib/MessageBus.psm1`
   - `scripts/lib/StatuslineManager.psm1`
   - `scripts/lib/SessionTabManager.psm1`
+  - `scripts/lib/LauncherCommon.psm1`
   - `config/config.json.template`
 - source tests:
   - `tests/unit/Config.Tests.ps1`
@@ -31,6 +32,7 @@ Migrate the reusable configuration and architecture guard layers from the Claude
   - `tests/unit/MessageBus.Tests.ps1`
   - `tests/unit/StatuslineManager.Tests.ps1`
   - `tests/unit/SessionTabManager.Tests.ps1`
+  - `tests/unit/LauncherCommon.Tests.ps1`
 
 ## Codex Adaptation Notes
 
@@ -44,13 +46,14 @@ Migrate the reusable configuration and architecture guard layers from the Claude
 - kept the state.json-backed message bus because it provides a reusable low-friction coordination primitive
 - kept statusLine extraction and remote sync primitives, while treating actual rollout policy as Codex-specific follow-up
 - kept session.json lifecycle management as reusable persistence, while not carrying over the original Windows Terminal tab assumptions
+- kept a small launcher-common subset for path, config, and drive-resolution behavior without carrying over the original full launcher stack
 
 ## Verification Method
 
 Run:
 
 ```powershell
-Invoke-Pester .\tests\unit\TokenBudget.Tests.ps1, .\tests\unit\Config.Tests.ps1, .\tests\unit\ConfigSchema.Tests.ps1, .\tests\unit\RecentProjects.Tests.ps1, .\tests\unit\ArchitectureCheck.Tests.ps1, .\tests\unit\LogManager.Tests.ps1, .\tests\unit\ErrorHandler.Tests.ps1, .\tests\unit\WorktreeManager.Tests.ps1, .\tests\unit\MessageBus.Tests.ps1, .\tests\unit\StatuslineManager.Tests.ps1, .\tests\unit\SessionTabManager.Tests.ps1
+Invoke-Pester .\tests\unit\TokenBudget.Tests.ps1, .\tests\unit\Config.Tests.ps1, .\tests\unit\ConfigSchema.Tests.ps1, .\tests\unit\RecentProjects.Tests.ps1, .\tests\unit\ArchitectureCheck.Tests.ps1, .\tests\unit\LogManager.Tests.ps1, .\tests\unit\ErrorHandler.Tests.ps1, .\tests\unit\WorktreeManager.Tests.ps1, .\tests\unit\MessageBus.Tests.ps1, .\tests\unit\StatuslineManager.Tests.ps1, .\tests\unit\SessionTabManager.Tests.ps1, .\tests\unit\LauncherCommon.Tests.ps1
 ```
 
 Expected:
@@ -64,3 +67,4 @@ Expected:
 - message publish / consume / status behavior remains verified
 - statusLine extraction behavior remains verified
 - session metadata persistence behavior remains verified
+- launcher path and SSH-drive resolution behavior remains verified
