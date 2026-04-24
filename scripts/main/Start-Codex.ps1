@@ -13,6 +13,7 @@ $script:StartupRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\LauncherCommon.psm1") -Force -DisableNameChecking
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\Config.psm1") -Force
+Import-Module (Join-Path $script:StartupRoot "scripts\lib\MessageBus.psm1") -Force
 
 function Get-CodexStatePath {
     if ($env:AI_STARTUP_STATE_PATH) {
@@ -105,6 +106,29 @@ function Update-CodexLaunchState {
     Set-Content -Path $StatePath -Value $json -Encoding UTF8 -NoNewline
 }
 
+function Publish-CodexLaunchPhaseTransition {
+    param(
+        [Parameter(Mandatory)]
+        [string]$StatePath,
+
+        [string]$ProjectName,
+
+        [switch]$PreviewOnly
+    )
+
+    if ($PreviewOnly -or -not (Test-Path $StatePath)) {
+        return $null
+    }
+
+    Initialize-MessageBus -StatePath $StatePath | Out-Null
+    return (Publish-BusMessage -Topic "phase.transition" -Publisher "Start-Codex" -Payload @{
+            from    = "Monitor"
+            to      = "Development"
+            project = $ProjectName
+            source  = "launcher"
+        } -StatePath $StatePath)
+}
+
 try {
     $bootstrapScript = Join-Path $PSScriptRoot "Start-CodexBootstrap.ps1"
     & $bootstrapScript -DryRun:$DryRun -NonInteractive:$NonInteractive
@@ -143,6 +167,7 @@ try {
 
     try {
         Update-CodexLaunchState -StatePath $statePath -Phase "Development" -ProjectName $projectLabel
+        $null = Publish-CodexLaunchPhaseTransition -StatePath $statePath -ProjectName $projectLabel
         Set-Location $workingDirectory
         & $command @arguments
         $exitCode = $LASTEXITCODE

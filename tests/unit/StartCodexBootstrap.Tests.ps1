@@ -81,6 +81,8 @@ Describe "Start-CodexBootstrap" {
         $state.goal.title | Should -Be "Codex StartUp migration execution"
         $state.execution.phase | Should -Be "Monitor"
         $state.execution.start_time | Should -Not -BeNullOrEmpty
+        @($state.message_bus."phase.transition").Count | Should -Be 1
+        $state.message_bus."phase.transition"[0].payload.to | Should -Be "Monitor"
     }
 
     It "codex 無効設定を拒否する" {

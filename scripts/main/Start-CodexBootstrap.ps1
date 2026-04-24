@@ -13,6 +13,7 @@ Import-Module (Join-Path $script:StartupRoot "scripts\lib\LauncherCommon.psm1") 
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\Config.psm1") -Force
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\TokenBudget.psm1") -Force
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\McpHealthCheck.psm1") -Force
+Import-Module (Join-Path $script:StartupRoot "scripts\lib\MessageBus.psm1") -Force
 
 function Get-BootstrapStatePath {
     if ($env:AI_STARTUP_STATE_PATH) {
@@ -195,6 +196,26 @@ function Update-BootstrapExecutionState {
     return $state.execution
 }
 
+function Publish-BootstrapPhaseTransition {
+    param(
+        [Parameter(Mandatory)]
+        [string]$StatePath,
+
+        [switch]$PreviewOnly
+    )
+
+    if ($PreviewOnly -or -not (Test-Path $StatePath)) {
+        return $null
+    }
+
+    Initialize-MessageBus -StatePath $StatePath | Out-Null
+    return (Publish-BusMessage -Topic "phase.transition" -Publisher "Start-CodexBootstrap" -Payload @{
+            from   = "Idle"
+            to     = "Monitor"
+            source = "bootstrap"
+        } -StatePath $StatePath)
+}
+
 function Write-BootstrapBanner {
     Write-Host ""
     Write-Host "Codex StartUp Bootstrap" -ForegroundColor Cyan
@@ -246,6 +267,7 @@ try {
     $stateResult = Initialize-BootstrapState -StatePath $statePath -PreviewOnly:$DryRun
     Write-Host ("State: {0}" -f $stateResult.Message) -ForegroundColor $(if ($stateResult.Created) { "Green" } elseif ($stateResult.Exists) { "DarkGray" } else { "Yellow" })
     $executionState = Update-BootstrapExecutionState -StatePath $statePath -PreviewOnly:$DryRun
+    $phaseMessageId = Publish-BootstrapPhaseTransition -StatePath $statePath -PreviewOnly:$DryRun
 
     $checks = Get-BootstrapPreflightChecks -ConfigPath $configPath -StatePath $statePath -Config $config
     Write-BootstrapPreflightChecks -Checks $checks
@@ -258,6 +280,9 @@ try {
     }
 
     Write-Host ("Execution Phase: {0}" -f $executionState.phase) -ForegroundColor Cyan
+    if ($phaseMessageId) {
+        Write-Host ("Phase Transition Message: {0}" -f $phaseMessageId) -ForegroundColor Cyan
+    }
 
     exit 0
 }

@@ -103,6 +103,9 @@ Describe "Start-Codex" {
         $state = Get-Content -Path $script:StatePath -Raw | ConvertFrom-Json
         $state.execution.phase | Should -Be "Development"
         $state.execution.current_project | Should -Be "DemoProject"
+        @($state.message_bus."phase.transition").Count | Should -Be 2
+        $state.message_bus."phase.transition"[-1].payload.to | Should -Be "Development"
+        $state.message_bus."phase.transition"[-1].payload.project | Should -Be "DemoProject"
     }
 
     AfterEach {
