@@ -73,5 +73,5 @@
   - 検証: `tests/unit/StateSchema.Tests.ps1`
 - `scripts/main/Start-CodexBootstrap.ps1`, `scripts/main/Start-Codex.ps1`
   - 分類: 調整して置換実装
-  - 理由: Claude 側の複数起動メニューをそのまま持ち込まず、Codex 向けの bootstrap、明示的 preflight、state 更新、phase transition publish 付きの単一ローカル起動入口へ再構成した
+  - 理由: Claude 側の複数起動メニューをそのまま持ち込まず、Codex 向けの bootstrap、明示的 preflight、state 更新、phase transition publish、標準ログ出力付きの単一ローカル起動入口へ再構成した
   - 検証: `tests/unit/StartCodexBootstrap.Tests.ps1`, `tests/unit/StartCodex.Tests.ps1`

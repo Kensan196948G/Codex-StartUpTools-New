@@ -14,6 +14,7 @@ $script:StartupRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\LauncherCommon.psm1") -Force -DisableNameChecking
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\Config.psm1") -Force
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\MessageBus.psm1") -Force
+Import-Module (Join-Path $script:StartupRoot "scripts\lib\LogManager.psm1") -Force
 
 function Get-CodexStatePath {
     if ($env:AI_STARTUP_STATE_PATH) {
@@ -164,6 +165,8 @@ try {
     $projectLabel = Get-CodexProjectLabel -ProjectName $Project -WorkingDirectory $workingDirectory
     $startAt = Get-Date
     $statePath = Get-CodexStatePath
+    $launchSucceeded = $false
+    Start-SessionLog -Config $config -ProjectName $projectLabel -ToolName "codex" | Out-Null
 
     try {
         Update-CodexLaunchState -StatePath $statePath -Phase "Development" -ProjectName $projectLabel
@@ -171,9 +174,12 @@ try {
         Set-Location $workingDirectory
         & $command @arguments
         $exitCode = $LASTEXITCODE
+        $launchSucceeded = ($exitCode -eq 0)
     }
     finally {
         Set-Location $previous
+        Invoke-LogRotation -Config $config
+        Stop-SessionLog -Success:$launchSucceeded
     }
 
     $elapsedMs = [int]((Get-Date) - $startAt).TotalMilliseconds

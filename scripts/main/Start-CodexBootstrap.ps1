@@ -14,6 +14,7 @@ Import-Module (Join-Path $script:StartupRoot "scripts\lib\Config.psm1") -Force
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\TokenBudget.psm1") -Force
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\McpHealthCheck.psm1") -Force
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\MessageBus.psm1") -Force
+Import-Module (Join-Path $script:StartupRoot "scripts\lib\LogManager.psm1") -Force
 
 function Get-BootstrapStatePath {
     if ($env:AI_STARTUP_STATE_PATH) {
@@ -252,11 +253,19 @@ function Write-BootstrapPreflightChecks {
     Write-Host ""
 }
 
+function Get-BootstrapLogProjectName {
+    return "bootstrap"
+}
+
+$bootstrapSucceeded = $false
+$config = $null
+
 try {
     Write-BootstrapBanner
 
     $configPath = Get-StartupConfigPath -StartupRoot $script:StartupRoot
     $config = Import-LauncherConfig -ConfigPath $configPath
+    Start-SessionLog -Config $config -ProjectName (Get-BootstrapLogProjectName) -ToolName "codex-bootstrap" | Out-Null
     Assert-StartupConfigSchema -ConfigPath $configPath | Out-Null
 
     if (-not $config.tools.codex.enabled) {
@@ -284,9 +293,16 @@ try {
         Write-Host ("Phase Transition Message: {0}" -f $phaseMessageId) -ForegroundColor Cyan
     }
 
+    $bootstrapSucceeded = $true
     exit 0
 }
 catch {
     Write-Host ("[ERR] {0}" -f $_.Exception.Message) -ForegroundColor Red
     exit 1
+}
+finally {
+    if ($config) {
+        Invoke-LogRotation -Config $config
+        Stop-SessionLog -Success:$bootstrapSucceeded
+    }
 }

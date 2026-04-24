@@ -16,6 +16,13 @@ BeforeAll {
             projectsDirUnc = "\\server\share"
             linuxHost      = "host"
             linuxBase      = "/home/user/Projects"
+            logging        = [ordered]@{
+                enabled         = $true
+                logDir          = (Join-Path $TestDrive "logs")
+                logPrefix       = "test-startup"
+                successKeepDays = 30
+                failureKeepDays = 90
+            }
             tools          = [ordered]@{
                 defaultTool = "codex"
                 claude      = [ordered]@{
@@ -106,6 +113,7 @@ Describe "Start-Codex" {
         @($state.message_bus."phase.transition").Count | Should -Be 2
         $state.message_bus."phase.transition"[-1].payload.to | Should -Be "Development"
         $state.message_bus."phase.transition"[-1].payload.project | Should -Be "DemoProject"
+        @(Get-ChildItem -Path (Join-Path $TestDrive "logs") -Filter "test-startup-*-SUCCESS.log" -ErrorAction SilentlyContinue).Count | Should -BeGreaterThan 0
     }
 
     AfterEach {
