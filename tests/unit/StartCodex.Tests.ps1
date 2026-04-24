@@ -100,6 +100,9 @@ Describe "Start-Codex" {
         @($recent.projects).Count | Should -Be 1
         $recent.projects[0].project | Should -Be "DemoProject"
         $recent.projects[0].tool | Should -Be "codex"
+        $state = Get-Content -Path $script:StatePath -Raw | ConvertFrom-Json
+        $state.execution.phase | Should -Be "Development"
+        $state.execution.current_project | Should -Be "DemoProject"
     }
 
     AfterEach {

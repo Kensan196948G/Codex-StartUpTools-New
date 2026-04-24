@@ -65,6 +65,7 @@ Describe "Start-CodexBootstrap" {
         $exitCode | Should -Be 0
         (Test-Path $script:StatePath) | Should -BeFalse
         ($output -join "`n") | Should -Match "Bootstrap Summary"
+        ($output -join "`n") | Should -Match "Preflight Checks"
     }
 
     It "通常実行では state.json を初期化する" {
@@ -76,7 +77,10 @@ Describe "Start-CodexBootstrap" {
 
         $exitCode | Should -Be 0
         (Test-Path $script:StatePath) | Should -BeTrue
-        ((Get-Content -Path $script:StatePath -Raw | ConvertFrom-Json).goal.title) | Should -Be "Codex StartUp migration execution"
+        $state = Get-Content -Path $script:StatePath -Raw | ConvertFrom-Json
+        $state.goal.title | Should -Be "Codex StartUp migration execution"
+        $state.execution.phase | Should -Be "Monitor"
+        $state.execution.start_time | Should -Not -BeNullOrEmpty
     }
 
     It "codex 無効設定を拒否する" {

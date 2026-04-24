@@ -52,6 +52,7 @@ Migrate the reusable configuration and architecture guard layers from the Claude
 - kept MCP diagnostics as a reduced inspection layer, excluding the original Claude-specific runtime orchestration
 - reduced `state.json` / `state.schema.json` to the minimum shape required by migrated Codex modules
 - replaced the old multi-tool `Start-*` launcher tree with a Codex bootstrap plus a single Codex entrypoint for local-first startup
+- expanded the Codex bootstrap to emit explicit preflight checks and update `state.json.execution` for startup continuity
 
 ## Verification Method
 

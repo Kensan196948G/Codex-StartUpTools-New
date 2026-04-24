@@ -103,6 +103,98 @@ function Get-BootstrapSummary {
     }
 }
 
+function Get-BootstrapPreflightChecks {
+    param(
+        [Parameter(Mandatory)]
+        [string]$ConfigPath,
+
+        [Parameter(Mandatory)]
+        [string]$StatePath,
+
+        [Parameter(Mandatory)]
+        [object]$Config
+    )
+
+    $gitRoot = git rev-parse --show-toplevel 2>$null
+    $toolCommand = "$($Config.tools.codex.command)"
+    $toolAvailable = [bool](Get-Command $toolCommand -ErrorAction SilentlyContinue)
+    $workflowPath = Join-Path $script:StartupRoot ".github\workflows"
+    $workflowExists = Test-Path $workflowPath
+    $mcpReport = Get-McpHealthReport -ProjectRoot $script:StartupRoot
+
+    return @(
+        [pscustomobject]@{
+            Name = "Git repository"
+            Ok = -not [string]::IsNullOrWhiteSpace($gitRoot)
+            Detail = if ($gitRoot) { $gitRoot } else { "git repository not detected" }
+        },
+        [pscustomobject]@{
+            Name = "Config file"
+            Ok = (Test-Path $ConfigPath)
+            Detail = $ConfigPath
+        },
+        [pscustomobject]@{
+            Name = "State file"
+            Ok = (Test-Path $StatePath)
+            Detail = $StatePath
+        },
+        [pscustomobject]@{
+            Name = "Codex command"
+            Ok = $toolAvailable
+            Detail = $toolCommand
+        },
+        [pscustomobject]@{
+            Name = "CI workflow"
+            Ok = $workflowExists
+            Detail = if ($workflowExists) { $workflowPath } else { "no .github/workflows directory" }
+        },
+        [pscustomobject]@{
+            Name = "MCP status"
+            Ok = $true
+            Detail = $mcpReport.summary
+        }
+    )
+}
+
+function Update-BootstrapExecutionState {
+    param(
+        [Parameter(Mandatory)]
+        [string]$StatePath,
+
+        [switch]$PreviewOnly
+    )
+
+    if (-not (Test-Path $StatePath)) {
+        if ($PreviewOnly) {
+            return [pscustomobject]@{
+                phase = "Monitor"
+                start_time = $null
+                last_bootstrap_at = $null
+            }
+        }
+
+        throw "state.json が見つかりません: $StatePath"
+    }
+
+    $state = Get-Content -Path $StatePath -Raw -Encoding UTF8 | ConvertFrom-Json
+    if (-not ($state.PSObject.Properties.Name -contains "execution") -or $null -eq $state.execution) {
+        $state | Add-Member -NotePropertyName "execution" -NotePropertyValue ([pscustomobject]@{}) -Force
+    }
+
+    $timestamp = (Get-Date).ToString("o")
+    $state.execution | Add-Member -NotePropertyName "phase" -NotePropertyValue "Monitor" -Force
+    $state.execution | Add-Member -NotePropertyName "start_time" -NotePropertyValue $timestamp -Force
+    $state.execution | Add-Member -NotePropertyName "last_bootstrap_at" -NotePropertyValue $timestamp -Force
+
+    if ($PreviewOnly) {
+        return $state.execution
+    }
+
+    $json = $state | ConvertTo-Json -Depth 20
+    Set-Content -Path $StatePath -Value $json -Encoding UTF8 -NoNewline
+    return $state.execution
+}
+
 function Write-BootstrapBanner {
     Write-Host ""
     Write-Host "Codex StartUp Bootstrap" -ForegroundColor Cyan
@@ -127,6 +219,18 @@ function Write-BootstrapSummary {
     Write-Host ""
 }
 
+function Write-BootstrapPreflightChecks {
+    param([Parameter(Mandatory)][object[]]$Checks)
+
+    Write-Host "Preflight Checks" -ForegroundColor Magenta
+    foreach ($check in $Checks) {
+        $mark = if ($check.Ok) { "[OK]" } else { "[WARN]" }
+        $color = if ($check.Ok) { "Green" } else { "Yellow" }
+        Write-Host ("  {0} {1}: {2}" -f $mark, $check.Name, $check.Detail) -ForegroundColor $color
+    }
+    Write-Host ""
+}
+
 try {
     Write-BootstrapBanner
 
@@ -141,6 +245,10 @@ try {
     $statePath = Get-BootstrapStatePath
     $stateResult = Initialize-BootstrapState -StatePath $statePath -PreviewOnly:$DryRun
     Write-Host ("State: {0}" -f $stateResult.Message) -ForegroundColor $(if ($stateResult.Created) { "Green" } elseif ($stateResult.Exists) { "DarkGray" } else { "Yellow" })
+    $executionState = Update-BootstrapExecutionState -StatePath $statePath -PreviewOnly:$DryRun
+
+    $checks = Get-BootstrapPreflightChecks -ConfigPath $configPath -StatePath $statePath -Config $config
+    Write-BootstrapPreflightChecks -Checks $checks
 
     $summary = Get-BootstrapSummary -ConfigPath $configPath -StatePath $statePath -Config $config
     Write-BootstrapSummary -Summary $summary
@@ -148,6 +256,8 @@ try {
     if (-not $summary.ToolAvailable) {
         throw "Codex コマンドが見つかりません: $($summary.ToolCommand)"
     }
+
+    Write-Host ("Execution Phase: {0}" -f $executionState.phase) -ForegroundColor Cyan
 
     exit 0
 }

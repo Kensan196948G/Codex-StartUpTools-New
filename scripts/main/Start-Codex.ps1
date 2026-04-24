@@ -14,6 +14,14 @@ $script:StartupRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\LauncherCommon.psm1") -Force -DisableNameChecking
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\Config.psm1") -Force
 
+function Get-CodexStatePath {
+    if ($env:AI_STARTUP_STATE_PATH) {
+        return $env:AI_STARTUP_STATE_PATH
+    }
+
+    return Join-Path $script:StartupRoot "state.json"
+}
+
 function Resolve-CodexWorkingDirectory {
     param(
         [Parameter(Mandatory)]
@@ -60,6 +68,43 @@ function Write-LaunchPlan {
     Write-Host ""
 }
 
+function Update-CodexLaunchState {
+    param(
+        [Parameter(Mandatory)]
+        [string]$StatePath,
+
+        [Parameter(Mandatory)]
+        [string]$Phase,
+
+        [string]$ProjectName,
+
+        [switch]$PreviewOnly
+    )
+
+    if (-not (Test-Path $StatePath)) {
+        return
+    }
+
+    $state = Get-Content -Path $StatePath -Raw -Encoding UTF8 | ConvertFrom-Json
+    if (-not ($state.PSObject.Properties.Name -contains "execution") -or $null -eq $state.execution) {
+        $state | Add-Member -NotePropertyName "execution" -NotePropertyValue ([pscustomobject]@{}) -Force
+    }
+
+    $timestamp = (Get-Date).ToString("o")
+    $state.execution | Add-Member -NotePropertyName "phase" -NotePropertyValue $Phase -Force
+    $state.execution | Add-Member -NotePropertyName "last_launch_at" -NotePropertyValue $timestamp -Force
+    if (-not [string]::IsNullOrWhiteSpace($ProjectName)) {
+        $state.execution | Add-Member -NotePropertyName "current_project" -NotePropertyValue $ProjectName -Force
+    }
+
+    if ($PreviewOnly) {
+        return
+    }
+
+    $json = $state | ConvertTo-Json -Depth 20
+    Set-Content -Path $StatePath -Value $json -Encoding UTF8 -NoNewline
+}
+
 try {
     $bootstrapScript = Join-Path $PSScriptRoot "Start-CodexBootstrap.ps1"
     & $bootstrapScript -DryRun:$DryRun -NonInteractive:$NonInteractive
@@ -94,8 +139,10 @@ try {
     $previous = Get-Location
     $projectLabel = Get-CodexProjectLabel -ProjectName $Project -WorkingDirectory $workingDirectory
     $startAt = Get-Date
+    $statePath = Get-CodexStatePath
 
     try {
+        Update-CodexLaunchState -StatePath $statePath -Phase "Development" -ProjectName $projectLabel
         Set-Location $workingDirectory
         & $command @arguments
         $exitCode = $LASTEXITCODE
