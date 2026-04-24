@@ -55,6 +55,7 @@ Migrate the reusable configuration and architecture guard layers from the Claude
 - expanded the Codex bootstrap to emit explicit preflight checks and update `state.json.execution` for startup continuity
 - connected bootstrap and launcher to `MessageBus` so phase transitions are published into `state.json`
 - connected startup scripts to `LogManager` so bootstrap and local launch flows leave standardized session logs
+- connected startup scripts to `ErrorHandler` so bootstrap and launcher failures are rendered with shared error categories
 
 ## Verification Method
 

@@ -93,6 +93,7 @@ Describe "Start-Codex" {
 
         $exitCode | Should -Be 1
         ($output -join "`n") | Should -Match "作業ディレクトリが見つかりません"
+        ($output -join "`n") | Should -Match "Error Category: FILE_SYSTEM"
     }
 
     It "実行成功時に recent-projects を更新する" {

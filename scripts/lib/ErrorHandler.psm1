@@ -173,7 +173,7 @@ function Get-ErrorCategory {
     elseif ($message -match "timeout|timed out|unreachable") {
         return [ErrorCategory]::NETWORK_TIMEOUT
     }
-    elseif ($message -match "\bfile\b|\bdirectory\b|\bfolder\b|write.*fail|read.*fail|\bpath\b.*not") {
+    elseif ($message -match "\bfile\b|\bdirectory\b|\bfolder\b|write.*fail|read.*fail|\bpath\b.*not|見つかりません|存在しません|ファイル|ディレクトリ|パス") {
         return [ErrorCategory]::FILE_SYSTEM
     }
     elseif ($message -match "\bprocess\b|\bkill\b|stop-process|start-process|\bpid\b") {

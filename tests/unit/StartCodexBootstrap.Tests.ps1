@@ -103,6 +103,7 @@ Describe "Start-CodexBootstrap" {
 
         $exitCode | Should -Be 1
         ($output -join "`n") | Should -Match "tools.codex.enabled"
+        ($output -join "`n") | Should -Match "Error Category: CONFIG_INVALID"
     }
 
     AfterEach {

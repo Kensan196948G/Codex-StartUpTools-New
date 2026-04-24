@@ -15,6 +15,7 @@ Import-Module (Join-Path $script:StartupRoot "scripts\lib\TokenBudget.psm1") -Fo
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\McpHealthCheck.psm1") -Force
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\MessageBus.psm1") -Force
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\LogManager.psm1") -Force
+Import-Module (Join-Path $script:StartupRoot "scripts\lib\ErrorHandler.psm1") -Force
 
 function Get-BootstrapStatePath {
     if ($env:AI_STARTUP_STATE_PATH) {
@@ -259,6 +260,8 @@ function Get-BootstrapLogProjectName {
 
 $bootstrapSucceeded = $false
 $config = $null
+$configPath = $null
+$statePath = $null
 
 try {
     Write-BootstrapBanner
@@ -297,7 +300,11 @@ try {
     exit 0
 }
 catch {
-    Write-Host ("[ERR] {0}" -f $_.Exception.Message) -ForegroundColor Red
+    Show-Error -Message $_.Exception.Message -Details @{
+        Script = "Start-CodexBootstrap"
+        ConfigPath = if ($configPath) { $configPath } else { "(unresolved)" }
+        StatePath = if ($statePath) { $statePath } else { "(unresolved)" }
+    } -ThrowAfter $false
     exit 1
 }
 finally {

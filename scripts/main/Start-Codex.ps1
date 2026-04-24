@@ -15,6 +15,10 @@ Import-Module (Join-Path $script:StartupRoot "scripts\lib\LauncherCommon.psm1") 
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\Config.psm1") -Force
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\MessageBus.psm1") -Force
 Import-Module (Join-Path $script:StartupRoot "scripts\lib\LogManager.psm1") -Force
+Import-Module (Join-Path $script:StartupRoot "scripts\lib\ErrorHandler.psm1") -Force
+
+$statePath = $null
+$workingDirectory = $null
 
 function Get-CodexStatePath {
     if ($env:AI_STARTUP_STATE_PATH) {
@@ -190,6 +194,11 @@ try {
     exit $exitCode
 }
 catch {
-    Write-Host ("[ERR] {0}" -f $_.Exception.Message) -ForegroundColor Red
+    Show-Error -Message $_.Exception.Message -Details @{
+        Script = "Start-Codex"
+        Project = if ($Project) { $Project } else { "(current)" }
+        StatePath = if ($statePath) { $statePath } else { Get-CodexStatePath }
+        WorkingDirectory = if ($workingDirectory) { $workingDirectory } else { "(unresolved)" }
+    } -ThrowAfter $false
     exit 1
 }
