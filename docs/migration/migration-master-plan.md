@@ -59,3 +59,28 @@
 - 移植先の配置方針が決まっている
 - 移植先ファイルが作成されている
 - 検証メモが残っている
+
+## 完了済みスライス
+
+- Token budget manager
+  - target module: `scripts/lib/TokenBudget.psm1`
+  - verification: `tests/unit/TokenBudget.Tests.ps1`
+  - migration notes: `docs/migration/token-budget-migration.md`
+- Config and recent-projects layer
+  - target modules: `scripts/lib/Config.psm1`, `scripts/lib/ConfigLoader.ps1`, `scripts/lib/ConfigSchema.ps1`, `scripts/lib/RecentProjects.ps1`
+  - verification: `tests/unit/Config.Tests.ps1`, `tests/unit/ConfigSchema.Tests.ps1`, `tests/unit/RecentProjects.Tests.ps1`
+  - migration notes: `docs/migration/config-and-architecture-migration.md`
+- Architecture guard layer
+  - target module: `scripts/lib/ArchitectureCheck.psm1`
+  - verification: `tests/unit/ArchitectureCheck.Tests.ps1`
+  - migration notes: `docs/migration/config-and-architecture-migration.md`
+- Logging and categorized error handling
+  - target modules: `scripts/lib/LogManager.psm1`, `scripts/lib/ErrorHandler.psm1`
+  - verification: `tests/unit/LogManager.Tests.ps1`, `tests/unit/ErrorHandler.Tests.ps1`
+  - migration notes: `docs/migration/config-and-architecture-migration.md`
+
+## 次の候補
+
+1. `WorktreeManager`
+2. `MessageBus`
+3. `StatuslineManager`

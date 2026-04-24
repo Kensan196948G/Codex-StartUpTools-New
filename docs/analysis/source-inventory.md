@@ -24,3 +24,22 @@
 2. `scripts/lib` を分類する
 3. `tests` を分類する
 4. `Claude/templates` から何を除外するか決める
+
+## 移植済みスライス
+
+- `scripts/lib/TokenBudget.psm1`
+  - 分類: 調整して移植
+  - 理由: 予算ロジックは汎用だが、リポジトリルート解決を Codex ローカル前提に簡素化した
+  - 検証: `tests/unit/TokenBudget.Tests.ps1`
+- `scripts/lib/Config*.ps1`, `scripts/lib/RecentProjects.ps1`
+  - 分類: 調整して移植
+  - 理由: 設定スキーマは再利用できるが、デフォルト値を Codex 主体に寄せた
+  - 検証: `tests/unit/Config.Tests.ps1`, `tests/unit/ConfigSchema.Tests.ps1`, `tests/unit/RecentProjects.Tests.ps1`
+- `scripts/lib/ArchitectureCheck.psm1`
+  - 分類: そのまま移植
+  - 理由: 静的な設計違反検査は Codex 側でもそのまま有効
+  - 検証: `tests/unit/ArchitectureCheck.Tests.ps1`
+- `scripts/lib/LogManager.psm1`, `scripts/lib/ErrorHandler.psm1`
+  - 分類: そのまま移植
+  - 理由: ログ運用と分類付きエラー処理は Claude ランタイムに依存しない
+  - 検証: `tests/unit/LogManager.Tests.ps1`, `tests/unit/ErrorHandler.Tests.ps1`

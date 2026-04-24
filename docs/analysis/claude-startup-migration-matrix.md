@@ -24,11 +24,14 @@
 - `docs/codex/*`
   - keep reusable guidance, remove references to disabled launcher paths
 - `scripts/lib/WorktreeManager.psm1`
-- `scripts/lib/LogManager.psm1`
-- `scripts/lib/ErrorHandler.psm1`
 - `scripts/lib/MessageBus.psm1`
 - `scripts/lib/SessionTabManager.psm1`
 - `scripts/lib/StatuslineManager.psm1`
+
+### Migrate directly (additional completed slice)
+
+- `scripts/lib/LogManager.psm1`
+- `scripts/lib/ErrorHandler.psm1`
 
 ### Reference only
 
@@ -53,17 +56,21 @@
   - `Config` family
   - `RecentProjects`
   - `ArchitectureCheck`
+  - `LogManager`
+  - `ErrorHandler`
 - migrated tests:
   - `TokenBudget`
   - `Config`
   - `ConfigSchema`
   - `RecentProjects`
   - `ArchitectureCheck`
+  - `LogManager`
+  - `ErrorHandler`
 
 ## Next Migration Queue
 
 1. `WorktreeManager`
-2. `LogManager`
-3. `ErrorHandler`
-4. `MessageBus`
-5. `StatuslineManager`
+2. `MessageBus`
+3. `StatuslineManager`
+4. `SessionTabManager`
+5. `Worktree`-adjacent launcher utilities
