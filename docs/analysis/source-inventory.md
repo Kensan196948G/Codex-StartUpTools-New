@@ -67,3 +67,7 @@
   - 分類: 調整して移植
   - 理由: MCP 診断は有用だが、Claude 固有の起動 / 停止運用は切り落として最小診断に縮小する
   - 検証: `tests/unit/McpHealthCheck.Tests.ps1`
+- `state.schema.json`, `state.json.example`
+  - 分類: 調整して移植
+  - 理由: Claude 側の巨大 state モデルは持ち込まず、`TokenBudget` と `MessageBus` が必要とする最小項目へ縮小した
+  - 検証: `tests/unit/StateSchema.Tests.ps1`

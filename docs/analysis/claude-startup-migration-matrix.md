@@ -25,6 +25,8 @@
   - keep reusable guidance, remove references to disabled launcher paths
 - `scripts/lib/LauncherCommon.psm1`
 - `scripts/lib/McpHealthCheck.psm1`
+- `state.schema.json`
+- `state.json.example`
 
 ### Migrate directly (additional completed slice)
 
@@ -64,6 +66,9 @@
   - `MessageBus`
   - `StatuslineManager`
   - `SessionTabManager`
+  - `LauncherCommon`
+  - `McpHealthCheck`
+  - `StateSchema`
 - migrated tests:
   - `TokenBudget`
   - `Config`
@@ -79,8 +84,8 @@
 
 ## Next Migration Queue
 
-1. `state.json` / `state.schema.json` の縮小設計
-2. `Start-*` 系エントリポイントの再構成
-3. `Start-ClaudeOS` 相当の Codex bootstrap 設計
-4. `CronManager` の要否再評価
-5. `Config` と起動エントリポイントの統合検証
+1. `Start-*` 系エントリポイントの再構成
+2. `Start-ClaudeOS` 相当の Codex bootstrap 設計
+3. `CronManager` の要否再評価
+4. `Config` と起動エントリポイントの統合検証
+5. セッション開始前チェックの標準化

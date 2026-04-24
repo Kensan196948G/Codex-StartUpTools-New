@@ -50,13 +50,14 @@ Migrate the reusable configuration and architecture guard layers from the Claude
 - kept session.json lifecycle management as reusable persistence, while not carrying over the original Windows Terminal tab assumptions
 - kept a small launcher-common subset for path, config, and drive-resolution behavior without carrying over the original full launcher stack
 - kept MCP diagnostics as a reduced inspection layer, excluding the original Claude-specific runtime orchestration
+- reduced `state.json` / `state.schema.json` to the minimum shape required by migrated Codex modules
 
 ## Verification Method
 
 Run:
 
 ```powershell
-Invoke-Pester .\tests\unit\TokenBudget.Tests.ps1, .\tests\unit\Config.Tests.ps1, .\tests\unit\ConfigSchema.Tests.ps1, .\tests\unit\RecentProjects.Tests.ps1, .\tests\unit\ArchitectureCheck.Tests.ps1, .\tests\unit\LogManager.Tests.ps1, .\tests\unit\ErrorHandler.Tests.ps1, .\tests\unit\WorktreeManager.Tests.ps1, .\tests\unit\MessageBus.Tests.ps1, .\tests\unit\StatuslineManager.Tests.ps1, .\tests\unit\SessionTabManager.Tests.ps1, .\tests\unit\LauncherCommon.Tests.ps1, .\tests\unit\McpHealthCheck.Tests.ps1
+Invoke-Pester .\tests\unit\TokenBudget.Tests.ps1, .\tests\unit\Config.Tests.ps1, .\tests\unit\ConfigSchema.Tests.ps1, .\tests\unit\RecentProjects.Tests.ps1, .\tests\unit\ArchitectureCheck.Tests.ps1, .\tests\unit\LogManager.Tests.ps1, .\tests\unit\ErrorHandler.Tests.ps1, .\tests\unit\WorktreeManager.Tests.ps1, .\tests\unit\MessageBus.Tests.ps1, .\tests\unit\StatuslineManager.Tests.ps1, .\tests\unit\SessionTabManager.Tests.ps1, .\tests\unit\LauncherCommon.Tests.ps1, .\tests\unit\McpHealthCheck.Tests.ps1, .\tests\unit\StateSchema.Tests.ps1
 ```
 
 Expected:
@@ -72,3 +73,4 @@ Expected:
 - session metadata persistence behavior remains verified
 - launcher path and SSH-drive resolution behavior remains verified
 - MCP argument escaping behavior remains verified
+- reduced state example remains compatible with `TokenBudget` and `MessageBus`

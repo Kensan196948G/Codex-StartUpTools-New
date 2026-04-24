@@ -102,9 +102,13 @@
   - target module: `scripts/lib/McpHealthCheck.psm1`
   - verification: `tests/unit/McpHealthCheck.Tests.ps1`
   - migration notes: `docs/migration/config-and-architecture-migration.md`
+- Reduced state model
+  - target artifacts: `state.schema.json`, `state.json.example`
+  - verification: `tests/unit/StateSchema.Tests.ps1`
+  - migration notes: `docs/migration/config-and-architecture-migration.md`
 
 ## 次の候補
 
-1. `state.json` / `state.schema.json` の縮小設計
-2. `Start-*` 系エントリポイントの再構成
-3. `Start-ClaudeOS` 相当の Codex bootstrap 設計
+1. `Start-*` 系エントリポイントの再構成
+2. `Start-ClaudeOS` 相当の Codex bootstrap 設計
+3. `CronManager` の要否再評価
