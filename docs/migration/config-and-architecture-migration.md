@@ -56,6 +56,7 @@ Migrate the reusable configuration and architecture guard layers from the Claude
 - connected bootstrap and launcher to `MessageBus` so phase transitions are published into `state.json`
 - connected startup scripts to `LogManager` so bootstrap and local launch flows leave standardized session logs
 - connected startup scripts to `ErrorHandler` so bootstrap and launcher failures are rendered with shared error categories
+- added a bootstrap readiness verdict so preflight results are summarized as `READY`, `READY_WITH_WARNINGS`, or `BLOCKED`
 
 ## Verification Method
 

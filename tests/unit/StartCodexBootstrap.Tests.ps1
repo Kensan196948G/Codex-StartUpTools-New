@@ -73,6 +73,7 @@ Describe "Start-CodexBootstrap" {
         (Test-Path $script:StatePath) | Should -BeFalse
         ($output -join "`n") | Should -Match "Bootstrap Summary"
         ($output -join "`n") | Should -Match "Preflight Checks"
+        ($output -join "`n") | Should -Match "Readiness: READY_WITH_WARNINGS"
     }
 
     It "通常実行では state.json を初期化する" {
@@ -91,6 +92,7 @@ Describe "Start-CodexBootstrap" {
         @($state.message_bus."phase.transition").Count | Should -Be 1
         $state.message_bus."phase.transition"[0].payload.to | Should -Be "Monitor"
         @(Get-ChildItem -Path (Join-Path $TestDrive "logs") -Filter "test-startup-*-SUCCESS.log" -ErrorAction SilentlyContinue).Count | Should -BeGreaterThan 0
+        (& pwsh -NoProfile -File $script:BootstrapScript -NonInteractive 2>&1 | Out-String) | Should -Match "Readiness: READY_WITH_WARNINGS"
     }
 
     It "codex 無効設定を拒否する" {

@@ -254,6 +254,63 @@ function Write-BootstrapPreflightChecks {
     Write-Host ""
 }
 
+function Get-BootstrapReadiness {
+    param([Parameter(Mandatory)][object[]]$Checks)
+
+    $mandatoryNames = @(
+        "Git repository",
+        "Config file",
+        "Codex command"
+    )
+
+    $failedMandatory = @($Checks | Where-Object { $_.Name -in $mandatoryNames -and -not $_.Ok })
+    $warnings = @($Checks | Where-Object { -not $_.Ok })
+
+    if ($failedMandatory.Count -gt 0) {
+        return [pscustomobject]@{
+            Status = "BLOCKED"
+            Ready = $false
+            WarningCount = $warnings.Count
+            BlockingChecks = @($failedMandatory.Name)
+        }
+    }
+
+    if ($warnings.Count -gt 0) {
+        return [pscustomobject]@{
+            Status = "READY_WITH_WARNINGS"
+            Ready = $true
+            WarningCount = $warnings.Count
+            BlockingChecks = @()
+        }
+    }
+
+    return [pscustomobject]@{
+        Status = "READY"
+        Ready = $true
+        WarningCount = 0
+        BlockingChecks = @()
+    }
+}
+
+function Write-BootstrapReadiness {
+    param([Parameter(Mandatory)][object]$Readiness)
+
+    $color = switch ($Readiness.Status) {
+        "READY" { "Green" }
+        "READY_WITH_WARNINGS" { "Yellow" }
+        default { "Red" }
+    }
+
+    Write-Host ("Readiness: {0}" -f $Readiness.Status) -ForegroundColor $color
+    if (@($Readiness.BlockingChecks).Count -gt 0) {
+        Write-Host ("  Blocking: {0}" -f ($Readiness.BlockingChecks -join ", ")) -ForegroundColor Red
+    }
+    elseif ($Readiness.WarningCount -gt 0) {
+        Write-Host ("  Warnings: {0}" -f $Readiness.WarningCount) -ForegroundColor Yellow
+    }
+    Write-Host ""
+}
+
 function Get-BootstrapLogProjectName {
     return "bootstrap"
 }
@@ -283,9 +340,15 @@ try {
 
     $checks = Get-BootstrapPreflightChecks -ConfigPath $configPath -StatePath $statePath -Config $config
     Write-BootstrapPreflightChecks -Checks $checks
+    $readiness = Get-BootstrapReadiness -Checks $checks
+    Write-BootstrapReadiness -Readiness $readiness
 
     $summary = Get-BootstrapSummary -ConfigPath $configPath -StatePath $statePath -Config $config
     Write-BootstrapSummary -Summary $summary
+
+    if (-not $readiness.Ready) {
+        throw "Bootstrap readiness blocked: $($readiness.BlockingChecks -join ', ')"
+    }
 
     if (-not $summary.ToolAvailable) {
         throw "Codex コマンドが見つかりません: $($summary.ToolCommand)"
