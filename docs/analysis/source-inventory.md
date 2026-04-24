@@ -63,3 +63,7 @@
   - 分類: 調整して移植
   - 理由: 起動共通処理は有用だが、Codex 側では最小責務に分解して残す必要がある
   - 検証: `tests/unit/LauncherCommon.Tests.ps1`
+- `scripts/lib/McpHealthCheck.psm1`
+  - 分類: 調整して移植
+  - 理由: MCP 診断は有用だが、Claude 固有の起動 / 停止運用は切り落として最小診断に縮小する
+  - 検証: `tests/unit/McpHealthCheck.Tests.ps1`

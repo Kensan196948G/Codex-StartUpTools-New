@@ -98,9 +98,13 @@
   - target module: `scripts/lib/LauncherCommon.psm1`
   - verification: `tests/unit/LauncherCommon.Tests.ps1`
   - migration notes: `docs/migration/config-and-architecture-migration.md`
+- MCP health-check subset
+  - target module: `scripts/lib/McpHealthCheck.psm1`
+  - verification: `tests/unit/McpHealthCheck.Tests.ps1`
+  - migration notes: `docs/migration/config-and-architecture-migration.md`
 
 ## 次の候補
 
-1. `McpHealthCheck`
-2. `state.json` / `state.schema.json` の縮小設計
-3. `Start-*` 系エントリポイントの再構成
+1. `state.json` / `state.schema.json` の縮小設計
+2. `Start-*` 系エントリポイントの再構成
+3. `Start-ClaudeOS` 相当の Codex bootstrap 設計
