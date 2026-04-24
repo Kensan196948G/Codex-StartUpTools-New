@@ -1,0 +1,42 @@
+# Config And Architecture Migration
+
+## Purpose
+
+Migrate the reusable configuration and architecture guard layers from the Claude-oriented source into Codex-first local tooling.
+
+## Source Mapping
+
+- source root: `Claude-StartUp`
+- source files:
+  - `scripts/lib/Config.psm1`
+  - `scripts/lib/ConfigLoader.ps1`
+  - `scripts/lib/ConfigSchema.ps1`
+  - `scripts/lib/RecentProjects.ps1`
+  - `scripts/lib/ArchitectureCheck.psm1`
+  - `config/config.json.template`
+- source tests:
+  - `tests/unit/Config.Tests.ps1`
+  - `tests/unit/ConfigSchema.Tests.ps1`
+  - `tests/unit/RecentProjects.Tests.ps1`
+  - `tests/unit/ArchitectureCheck.Tests.ps1`
+
+## Codex Adaptation Notes
+
+- kept schema validation and recent-project history because they are runtime-agnostic
+- changed the config template to `codex` default-first values
+- treated Claude launcher and cron-specific settings as optional future extensions rather than target defaults
+- kept architecture rules that protect code quality and Git workflow, but did not wire them to Claude-specific boot flows
+
+## Verification Method
+
+Run:
+
+```powershell
+Invoke-Pester .\tests\unit\TokenBudget.Tests.ps1, .\tests\unit\Config.Tests.ps1, .\tests\unit\ConfigSchema.Tests.ps1, .\tests\unit\RecentProjects.Tests.ps1, .\tests\unit\ArchitectureCheck.Tests.ps1
+```
+
+Expected:
+
+- all migrated unit tests pass
+- config template validates under the migrated schema
+- architecture checks detect critical and warning cases correctly

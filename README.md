@@ -1,31 +1,27 @@
 # Codex StartUp Tools
 
-Codex latest edition oriented startup toolkit workspace.
+このリポジトリは、**Codex 最新版を主たる開発エージェントとして使うことを前提**にしたスタートアップツール群の移植先です。
 
-This repository is intended to be developed with Codex as the primary implementation agent.
+元リポジトリ `D:\ClaudeCode-StartUpTools-New` から、再利用可能な運用ポリシー、ドキュメント構造、スクリプト、検証フローを抽出し、**Codex ネイティブな構成**として再構築します。
 
-This repository is the migration target for extracting reusable operating policies,
-documentation patterns, scripts, and verification flows from
-`D:\ClaudeCode-StartUpTools-New` into a Codex-native structure for ongoing development in Codex.
+## 初期目的
 
-## Initial Goal
+- Codex 向けの運用モデルを再構築する
+- Claude 専用前提を分離し、再利用可能部分だけを移植する
+- 小さな単位で移植し、都度検証する
 
-- rebuild the core operating model for Codex
-- separate reusable logic from Claude-specific runtime assumptions
-- migrate in small verified batches
+## 作業ルール
 
-## Working Rules
+- 元リポジトリを丸ごとこのルートへコピーしない
+- 機能単位で移植し、必ず検証する
+- docs、scripts、tests の整合を保つ
+- ベンダー固有の互換レイヤーより、Codex ネイティブな構成を優先する
+- 実装作業は Codex を中心に進め、手動対応が必要な点だけ明記する
 
-- do not bulk-copy the source repository into this root
-- migrate by feature group with validation
-- keep docs, scripts, and tests aligned
-- prefer Codex-native configuration and workflows over vendor-specific compatibility shims
-- perform implementation work in Codex and document any required manual follow-up
+## 推奨フェーズ
 
-## Suggested Phases
-
-1. Audit and classify source assets
-2. Define Codex-native root structure
-3. Migrate core policies and operating docs
-4. Migrate reusable scripts and tests
-5. Add verification and maintenance workflows
+1. 元リポジトリ資産の監査と分類
+2. Codex 向けルート構成の定義
+3. コア方針と運用ドキュメントの移植
+4. 再利用可能なスクリプトとテストの移植
+5. 検証と保守フローの整備

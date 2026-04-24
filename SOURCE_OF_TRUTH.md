@@ -1,46 +1,46 @@
 # SOURCE_OF_TRUTH
 
-This file defines the canonical sources for project intent, migration scope, and development rules.
+このファイルは、このリポジトリで何を正とみなすかを定義します。
 
-## Primary Canonical Files
+## 正本となる主要ファイル
 
 1. `PROJECT_POLICY.md`
-   - the top-level operating policy for this repository
+   - このリポジトリの最上位運用方針
 2. `AGENTS.md`
-   - agent behavior, execution order, and delivery rules
+   - エージェントの振る舞い、実行順、成果物ルール
 3. `.codex/config.toml`
-   - Codex-oriented project configuration
+   - Codex 向けのプロジェクト設定
 4. `docs/migration/migration-master-plan.md`
-   - migration scope, workstreams, and done criteria
+   - 移植範囲、作業ストリーム、完了条件
 5. `docs/analysis/source-inventory.md`
-   - current understanding of the source repository and migration inputs
+   - 元リポジトリに関する現時点の把握内容
 
-## Source Repository Reference
+## 元リポジトリ参照
 
-The source repository for migration is:
+移植元リポジトリ:
 
 - `D:\ClaudeCode-StartUpTools-New`
 
-Source files are reference inputs, not automatic truth for the target repository.
-When the source and target differ, the target repository's Codex-native rules take priority unless an intentional migration note says otherwise.
+元リポジトリは参照元であり、そのまま移植先の正本ではありません。  
+元と移植先に差異がある場合は、明示的な移植メモがない限り、**移植先の Codex ネイティブ方針**を優先します。
 
-## Decision Priority
+## 判断優先順位
 
-When conflicts appear, resolve them in this order:
+方針や実装に矛盾がある場合は、以下の順で判断します。
 
 1. `PROJECT_POLICY.md`
 2. `AGENTS.md`
-3. verified target implementation
-4. target tests
-5. migration plan and analysis docs
-6. source repository artifacts
+3. 検証済みの移植先実装
+4. 移植先のテスト
+5. 移植計画と分析ドキュメント
+6. 元リポジトリの成果物
 
-## Change Control
+## 更新ルール
 
-Update this file when:
+次のときにこのファイルを更新します。
 
-- a new root policy file becomes authoritative
-- a migration area changes ownership
-- a former source-of-truth file is deprecated
+- 新しいルート方針ファイルが正本に加わるとき
+- 移植領域の責務や位置づけが変わるとき
+- 以前の正本ファイルを廃止するとき
 
-Do not introduce new root guidance documents without linking them here.
+ルート直下に新しい方針文書を追加する場合は、必ずここに追記します。

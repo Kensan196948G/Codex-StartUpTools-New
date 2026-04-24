@@ -1,81 +1,81 @@
 # PROJECT_POLICY
 
-## Purpose
+## 目的
 
-This repository exists to rebuild the useful parts of
-`D:\ClaudeCode-StartUpTools-New` into a Codex-native startup toolkit.
+このリポジトリは、`D:\ClaudeCode-StartUpTools-New` の有用な部分を  
+**Codex ネイティブなスタートアップツール群**として再構築するために存在します。
 
-Codex is the primary development environment and implementation agent for this project.
+**Codex を主たる開発環境および実装エージェント**として扱います。
 
-## Core Principles
+## 基本原則
 
-- build for Codex first, not for cross-tool appearance parity
-- migrate capabilities, not entire directory trees
-- prefer small verified increments over large bulk imports
-- keep documentation, scripts, and tests in sync
-- remove or replace source behaviors that depend on Claude-only runtime features
-- document every meaningful adaptation from the source repository
+- 見た目の互換より、Codex 向け最適化を優先する
+- ディレクトリ一式ではなく、機能と責務を移植する
+- 大量コピーより、小さく検証可能な単位で進める
+- docs、scripts、tests を常に同期させる
+- Claude 専用ランタイム依存は削除または置換する
+- 元リポジトリからの変換内容は必ず記録する
 
-## Development Standard
+## 開発基準
 
-- every feature should have a clear purpose before implementation
-- executable behavior should be paired with verification
-- docs should describe how the Codex version works, not only how the source version worked
-- if a feature cannot be faithfully migrated, define the supported Codex behavior explicitly
+- 実装前に各機能の目的を明確にする
+- 実行可能な挙動には検証方法をセットで持たせる
+- docs は「元がどうだったか」だけでなく「Codex版がどう動くか」を説明する
+- 忠実移植が難しい場合は、Codex 版の対応仕様を明示する
 
-## Migration Classification Rules
+## 移植分類ルール
 
-Each source artifact should be classified as one of the following:
+元資産は次のいずれかに分類します。
 
-- migrate directly
-- migrate with adaptation
-- replace with Codex-native implementation
-- archive as reference only
-- do not migrate
+- そのまま移植
+- 調整して移植
+- Codex 向けに置換実装
+- 参考資料として保管
+- 移植しない
 
-## Working Model
+## 作業モデル
 
-Preferred sequence:
+推奨順序:
 
-1. monitor the current state
-2. define a narrow migration slice
-3. implement the Codex-native version
-4. verify behavior
-5. record migration notes
+1. 現状を監査する
+2. 小さな移植単位を定義する
+3. Codex 向けの実装へ落とし込む
+4. 動作を検証する
+5. 移植メモを残す
 
-## Quality Bar
+## 品質基準
 
-A migration slice is considered acceptable when:
+移植単位が受け入れ可能と判断できる条件:
 
-- its purpose is documented
-- its source mapping is known
-- its target behavior is explicit
-- tests or verification steps are recorded
-- no unsupported parity claim is made
+- 目的が文書化されている
+- 元機能との対応が追える
+- 移植先の挙動が明確である
+- テストまたは検証手順がある
+- 未検証の完全互換を主張していない
 
-## Repository Layout Intent
+## 期待するリポジトリ構成
 
-Root files:
-- policy, truth, onboarding, and summary files only
+ルート:
+- 方針、正本、オンボーディング、要約などの中核文書のみ
 
 `docs/`
-- analysis, migration notes, operating guides, and design references
+- 分析、移植メモ、運用ガイド、設計資料
 
 `scripts/`
-- Codex-oriented automation and reusable implementation helpers
+- Codex 向け自動化と再利用可能な実装補助
 
 `tests/`
-- verification for migrated executable behavior
+- 移植した実行機能の検証
 
 `.codex/`
-- Codex configuration and project-specific agent setup
+- Codex 設定とプロジェクト固有エージェント設定
 
-## Non-Goals
+## 非目標
 
-- full behavioral emulation of Claude-specific hooks
-- exact reproduction of vendor-specific command ecosystems
-- copying large source trees without redesign
+- Claude 固有 hook の完全再現
+- ベンダー固有 command 体系の厳密互換
+- 設計なしの大量コピー移植
 
-## Review Rule
+## レビュー原則
 
-If a change makes the target repository less Codex-native just to preserve superficial parity with the source repository, prefer redesign over compatibility.
+見かけ上の互換のために Codex らしさを損なう変更は避け、必要なら互換より再設計を優先します。

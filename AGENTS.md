@@ -1,37 +1,42 @@
 # AGENTS.md
 
-## Codex Operating Model
+## Codex 運用モデル
 
-This repository is operated as a Codex-native migration project.
-Codex is also the primary development environment and implementation engine for this repository.
+このリポジトリは、**Codex ネイティブな移植プロジェクト**として運用します。  
+また、**Codex を主たる開発環境および実装エージェント**として使用します。
 
-Primary intent:
-- analyze the source repository in `D:\ClaudeCode-StartUpTools-New`
-- preserve reusable architecture, governance, and verification patterns
-- reimplement only the parts that make sense for Codex
-- build and evolve the target repository through Codex-first development workflows
+主な目的:
 
-Execution priorities:
+- `D:\ClaudeCode-StartUpTools-New` を分析する
+- 再利用可能な設計、運用、検証パターンを保持する
+- Codex に適したものだけを再実装する
+- Codex を前提とした開発フローで移植先リポジトリを育てる
+
+優先実行順:
+
 1. monitor
 2. build
 3. verify
 4. improve
 
-Core rules:
-- prefer small, reversible changes
-- do not claim feature parity unless verified
-- translate concepts before translating files
-- keep source-specific assumptions documented in migration notes
-- add tests when migrating executable behavior
+基本ルール:
 
-Stop conditions:
-- same blocking error repeated 3 times
-- unknown external dependency blocks migration
-- feature depends on Claude-only runtime behavior with no safe Codex substitute
+- 小さく、戻しやすい変更を優先する
+- 検証していない機能互換を主張しない
+- ファイルを移す前に、まず概念を翻訳する
+- 元リポジトリ特有の前提は移植ノートに残す
+- 実行可能な振る舞いを移すときはテストを追加する
 
-Deliverable standard:
-- every migrated feature should have
-  - purpose
-  - source mapping
-  - Codex adaptation notes
-  - verification method
+停止条件:
+
+- 同じ種類のブロッカーが 3 回連続で発生
+- 外部依存が不明で安全に進められない
+- Claude 専用ランタイムに依存し、Codex で安全な代替が用意できない
+
+成果物の最低基準:
+
+- 各移植機能に以下を持たせる
+- 目的
+- 元機能との対応関係
+- Codex 向けの変換メモ
+- 検証方法

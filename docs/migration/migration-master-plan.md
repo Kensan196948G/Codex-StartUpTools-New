@@ -1,71 +1,61 @@
-# Migration Master Plan
+# 移植マスタープラン
 
-## Scope
+## 対象範囲
 
-Source:
+移植元:
+
 - `D:\ClaudeCode-StartUpTools-New`
 
-Target:
+移植先:
+
 - `D:\Codex-StartUpTools-New`
 
-## Migration Principles
+## 移植原則
 
-- migrate capabilities, not directory trees
-- separate policy, implementation, and templates
-- rewrite Claude-specific runtime assumptions into Codex-oriented operations
-- keep every migrated area independently reviewable
-- treat Codex as the default development agent for implementing the target repository
+- ディレクトリ構造ではなく、機能を移植する
+- 方針、実装、テンプレートを分離して扱う
+- Claude 専用ランタイム前提を Codex 向け運用に置き換える
+- 各移植領域を個別にレビュー可能な単位で進める
+- Codex を標準開発エージェントとして実装を進める
 
-## Workstreams
+## 作業ストリーム
 
-1. Operating policy
-2. Documentation and source-of-truth structure
-3. Reusable PowerShell and helper scripts
-4. Verification and tests
-5. Optional automation and backlog support
+1. 運用方針
+2. ドキュメントと正本構造
+3. 再利用可能な PowerShell / 補助スクリプト
+4. 検証とテスト
+5. 必要に応じた自動化とバックログ支援
 
-## First Pass Classification
+## 一次分類
 
-- likely high portability
-  - governance docs
-  - loop definitions
-  - architecture checks
-  - generic script utilities
-  - tests that validate reusable script behavior
-- requires adaptation
-  - launcher flows
-  - state management
-  - agent team abstractions
-  - issue sync operations
-- likely partial or replace
+- 高確率で移植しやすい
+  - ガバナンス文書
+  - ループ定義
+  - アーキテクチャチェック
+  - 汎用スクリプトユーティリティ
+  - 再利用可能なスクリプト挙動を検証するテスト
+- 調整が必要
+  - ランチャーフロー
+  - 状態管理
+  - エージェントチーム抽象
+  - Issue 同期
+- 部分移植または置換
   - Claude hooks
   - Claude templates
-  - Claude runtime specific commands
+  - Claude ランタイム専用 commands
 
-## Session Definition
+## 1セッションの定義
 
-One working session should complete one of the following:
-- one document family audit
-- one script module audit
-- one migrated feature skeleton
-- one verification pass
+1回の作業セッションでは、次のいずれか1つを完了目標にします。
 
-## Done Criteria
+- 1つの文書群の監査
+- 1つのスクリプトモジュールの監査
+- 1つの移植機能の骨格作成
+- 1回の検証実施
 
-- source mapping recorded
-- target structure decided
-- migrated files written
-- verification notes added
+## 完了条件
 
-## Completed Slices
-
-- Token budget manager
-  - target module: `scripts/lib/TokenBudget.psm1`
-  - verification: `tests/unit/TokenBudget.Tests.ps1`
-  - migration notes: `docs/migration/token-budget-migration.md`
-
-## Next Candidates
-
-1. `ArchitectureCheck`
-2. `Config` and schema loading
-3. `WorktreeManager`
+- 元機能との対応が記録されている
+- 移植先の配置方針が決まっている
+- 移植先ファイルが作成されている
+- 検証メモが残っている

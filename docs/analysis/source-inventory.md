@@ -1,29 +1,26 @@
-# Source Inventory
+# 元リポジトリ棚卸し
 
-Initial observations from `D:\ClaudeCode-StartUpTools-New`:
+対象:
 
-- source repo is documentation-heavy
-- reusable logic is concentrated in `scripts/lib` and `scripts/main`
-- source contains large Claude-specific template and instruction trees
-- tests already exist and can guide selective migration
+- `D:\ClaudeCode-StartUpTools-New`
 
-High-level counts observed during initial audit:
+## 初期観察
 
-- non-`node_modules` files: about 382
-- markdown files: 263
-- PowerShell files: 86
-- config-like files: 17
+- ドキュメント比重が高い
+- 再利用可能なロジックは主に `scripts/lib` と `scripts/main` に集中している
+- Claude 固有のテンプレートと指示文ツリーが大きい
+- 既存テストがあるため、選択移植の判断材料として使いやすい
 
-## Immediate Focus
+## 初期監査時の概数
 
-1. map root docs to Codex-native equivalents
-2. classify `scripts/lib`
-3. classify `tests`
-4. decide what to ignore from `Claude/templates`
+- `node_modules` を除くファイル数: 約 382
+- Markdown ファイル数: 263
+- PowerShell ファイル数: 86
+- 設定系ファイル数: 17
 
-## Migrated Slice
+## 直近の重点項目
 
-- `scripts/lib/TokenBudget.psm1`
-  - classification: migrate with adaptation
-  - reason: budgeting logic is generic, but repository-root detection was simplified for Codex-local execution
-  - verification: `tests/unit/TokenBudget.Tests.ps1`
+1. ルート文書を Codex 向けに対応付ける
+2. `scripts/lib` を分類する
+3. `tests` を分類する
+4. `Claude/templates` から何を除外するか決める

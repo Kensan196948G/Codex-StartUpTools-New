@@ -1,0 +1,68 @@
+{
+  "_comment": "Codex-native startup tools config template",
+  "version": "1.0.0",
+  "projectsDir": "D:\\",
+  "sshProjectsDir": "auto",
+  "projectsDirUnc": "\\\\<your-linux-host>\\Projects",
+  "linuxHost": "<your-linux-host>",
+  "linuxBase": "/home/user/Projects",
+  "localExcludes": [],
+  "tools": {
+    "defaultTool": "codex",
+    "claude": {
+      "enabled": false,
+      "command": "claude",
+      "args": [],
+      "installCommand": "npm install -g @anthropic-ai/claude-code",
+      "env": {},
+      "apiKeyEnvVar": "ANTHROPIC_API_KEY"
+    },
+    "codex": {
+      "enabled": true,
+      "command": "codex",
+      "args": [
+        "--full-auto"
+      ],
+      "installCommand": "npm install -g @openai/codex",
+      "env": {
+        "OPENAI_API_KEY": ""
+      },
+      "apiKeyEnvVar": "OPENAI_API_KEY"
+    },
+    "copilot": {
+      "enabled": false,
+      "command": "copilot",
+      "args": [],
+      "installCommand": "npm install -g @github/copilot",
+      "env": {}
+    }
+  },
+  "ssh": {
+    "autoCleanup": true,
+    "options": [
+      "-t"
+    ]
+  },
+  "logging": {
+    "enabled": true,
+    "logDir": "logs",
+    "logPrefix": "codex-startup",
+    "successKeepDays": 30,
+    "failureKeepDays": 90
+  },
+  "backupConfig": {
+    "enabled": true,
+    "backupDir": "config/backups",
+    "maxBackups": 10,
+    "maskSensitive": true,
+    "sensitiveKeys": [
+      "tools.claude.env.ANTHROPIC_API_KEY",
+      "tools.codex.env.OPENAI_API_KEY"
+    ]
+  },
+  "recentProjects": {
+    "enabled": true,
+    "maxHistory": 10,
+    "historyFile": "%USERPROFILE%\\.codex-startup\\recent-projects.json"
+  }
+}
