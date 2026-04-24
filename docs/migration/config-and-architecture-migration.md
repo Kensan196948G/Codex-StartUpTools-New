@@ -18,6 +18,7 @@ Migrate the reusable configuration and architecture guard layers from the Claude
   - `scripts/lib/WorktreeManager.psm1`
   - `scripts/lib/MessageBus.psm1`
   - `scripts/lib/StatuslineManager.psm1`
+  - `scripts/lib/SessionTabManager.psm1`
   - `config/config.json.template`
 - source tests:
   - `tests/unit/Config.Tests.ps1`
@@ -29,6 +30,7 @@ Migrate the reusable configuration and architecture guard layers from the Claude
   - `tests/unit/WorktreeManager.Tests.ps1`
   - `tests/unit/MessageBus.Tests.ps1`
   - `tests/unit/StatuslineManager.Tests.ps1`
+  - `tests/unit/SessionTabManager.Tests.ps1`
 
 ## Codex Adaptation Notes
 
@@ -41,13 +43,14 @@ Migrate the reusable configuration and architecture guard layers from the Claude
 - kept Git worktree lifecycle helpers because they are directly applicable to Codex repository operations
 - kept the state.json-backed message bus because it provides a reusable low-friction coordination primitive
 - kept statusLine extraction and remote sync primitives, while treating actual rollout policy as Codex-specific follow-up
+- kept session.json lifecycle management as reusable persistence, while not carrying over the original Windows Terminal tab assumptions
 
 ## Verification Method
 
 Run:
 
 ```powershell
-Invoke-Pester .\tests\unit\TokenBudget.Tests.ps1, .\tests\unit\Config.Tests.ps1, .\tests\unit\ConfigSchema.Tests.ps1, .\tests\unit\RecentProjects.Tests.ps1, .\tests\unit\ArchitectureCheck.Tests.ps1, .\tests\unit\LogManager.Tests.ps1, .\tests\unit\ErrorHandler.Tests.ps1, .\tests\unit\WorktreeManager.Tests.ps1, .\tests\unit\MessageBus.Tests.ps1, .\tests\unit\StatuslineManager.Tests.ps1
+Invoke-Pester .\tests\unit\TokenBudget.Tests.ps1, .\tests\unit\Config.Tests.ps1, .\tests\unit\ConfigSchema.Tests.ps1, .\tests\unit\RecentProjects.Tests.ps1, .\tests\unit\ArchitectureCheck.Tests.ps1, .\tests\unit\LogManager.Tests.ps1, .\tests\unit\ErrorHandler.Tests.ps1, .\tests\unit\WorktreeManager.Tests.ps1, .\tests\unit\MessageBus.Tests.ps1, .\tests\unit\StatuslineManager.Tests.ps1, .\tests\unit\SessionTabManager.Tests.ps1
 ```
 
 Expected:
@@ -60,3 +63,4 @@ Expected:
 - worktree summary and base-path behavior remain verified
 - message publish / consume / status behavior remains verified
 - statusLine extraction behavior remains verified
+- session metadata persistence behavior remains verified

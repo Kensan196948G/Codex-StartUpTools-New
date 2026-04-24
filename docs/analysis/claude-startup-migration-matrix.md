@@ -23,7 +23,6 @@
   - adapt default tool and examples for Codex-first operation
 - `docs/codex/*`
   - keep reusable guidance, remove references to disabled launcher paths
-- `scripts/lib/SessionTabManager.psm1`
 
 ### Migrate directly (additional completed slice)
 
@@ -32,6 +31,7 @@
 - `scripts/lib/WorktreeManager.psm1`
 - `scripts/lib/MessageBus.psm1`
 - `scripts/lib/StatuslineManager.psm1`
+- `scripts/lib/SessionTabManager.psm1`
 
 ### Reference only
 
@@ -61,6 +61,7 @@
   - `WorktreeManager`
   - `MessageBus`
   - `StatuslineManager`
+  - `SessionTabManager`
 - migrated tests:
   - `TokenBudget`
   - `Config`
@@ -72,11 +73,12 @@
   - `WorktreeManager`
   - `MessageBus`
   - `StatuslineManager`
+  - `SessionTabManager`
 
 ## Next Migration Queue
 
-1. `SessionTabManager`
-2. `LauncherCommon`
-3. `McpHealthCheck`
-4. `state.json` / `state.schema.json` の縮小設計
-5. `Start-*` 系エントリポイントの再構成
+1. `LauncherCommon`
+2. `McpHealthCheck`
+3. `state.json` / `state.schema.json` の縮小設計
+4. `Start-*` 系エントリポイントの再構成
+5. `Start-ClaudeOS` 相当の Codex bootstrap 設計

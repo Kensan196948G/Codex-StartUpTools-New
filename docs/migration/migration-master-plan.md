@@ -90,9 +90,13 @@
   - target module: `scripts/lib/StatuslineManager.psm1`
   - verification: `tests/unit/StatuslineManager.Tests.ps1`
   - migration notes: `docs/migration/config-and-architecture-migration.md`
+- Session state manager
+  - target module: `scripts/lib/SessionTabManager.psm1`
+  - verification: `tests/unit/SessionTabManager.Tests.ps1`
+  - migration notes: `docs/migration/config-and-architecture-migration.md`
 
 ## 次の候補
 
-1. `SessionTabManager`
-2. `LauncherCommon`
-3. `McpHealthCheck`
+1. `LauncherCommon`
+2. `McpHealthCheck`
+3. `state.json` / `state.schema.json` の縮小設計

@@ -55,3 +55,7 @@
   - 分類: 調整して移植
   - 理由: 設定読取はそのまま使えるが、同期先や運用前提は Codex 側に合わせて見直す必要がある
   - 検証: `tests/unit/StatuslineManager.Tests.ps1`
+- `scripts/lib/SessionTabManager.psm1`
+  - 分類: 調整して移植
+  - 理由: UI 表示ではなく、session.json の状態管理部分を Codex 向けに再利用する
+  - 検証: `tests/unit/SessionTabManager.Tests.ps1`
