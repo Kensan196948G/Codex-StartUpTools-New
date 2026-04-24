@@ -15,6 +15,7 @@ Migrate the reusable configuration and architecture guard layers from the Claude
   - `scripts/lib/ArchitectureCheck.psm1`
   - `scripts/lib/LogManager.psm1`
   - `scripts/lib/ErrorHandler.psm1`
+  - `scripts/lib/WorktreeManager.psm1`
   - `config/config.json.template`
 - source tests:
   - `tests/unit/Config.Tests.ps1`
@@ -23,6 +24,7 @@ Migrate the reusable configuration and architecture guard layers from the Claude
   - `tests/unit/ArchitectureCheck.Tests.ps1`
   - `tests/unit/LogManager.Tests.ps1`
   - `tests/unit/ErrorHandler.Tests.ps1`
+  - `tests/unit/WorktreeManager.Tests.ps1`
 
 ## Codex Adaptation Notes
 
@@ -32,13 +34,14 @@ Migrate the reusable configuration and architecture guard layers from the Claude
 - kept architecture rules that protect code quality and Git workflow, but did not wire them to Claude-specific boot flows
 - kept log rotation and categorized error handling as reusable operational helpers
 - simplified some user-facing wording for Codex-first local use
+- kept Git worktree lifecycle helpers because they are directly applicable to Codex repository operations
 
 ## Verification Method
 
 Run:
 
 ```powershell
-Invoke-Pester .\tests\unit\TokenBudget.Tests.ps1, .\tests\unit\Config.Tests.ps1, .\tests\unit\ConfigSchema.Tests.ps1, .\tests\unit\RecentProjects.Tests.ps1, .\tests\unit\ArchitectureCheck.Tests.ps1, .\tests\unit\LogManager.Tests.ps1, .\tests\unit\ErrorHandler.Tests.ps1
+Invoke-Pester .\tests\unit\TokenBudget.Tests.ps1, .\tests\unit\Config.Tests.ps1, .\tests\unit\ConfigSchema.Tests.ps1, .\tests\unit\RecentProjects.Tests.ps1, .\tests\unit\ArchitectureCheck.Tests.ps1, .\tests\unit\LogManager.Tests.ps1, .\tests\unit\ErrorHandler.Tests.ps1, .\tests\unit\WorktreeManager.Tests.ps1
 ```
 
 Expected:
@@ -48,3 +51,4 @@ Expected:
 - architecture checks detect critical and warning cases correctly
 - log summary and rotation behavior remain verified
 - categorized error detection remains verified
+- worktree summary and base-path behavior remain verified

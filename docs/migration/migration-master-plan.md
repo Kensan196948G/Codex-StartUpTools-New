@@ -78,9 +78,13 @@
   - target modules: `scripts/lib/LogManager.psm1`, `scripts/lib/ErrorHandler.psm1`
   - verification: `tests/unit/LogManager.Tests.ps1`, `tests/unit/ErrorHandler.Tests.ps1`
   - migration notes: `docs/migration/config-and-architecture-migration.md`
+- Worktree manager
+  - target module: `scripts/lib/WorktreeManager.psm1`
+  - verification: `tests/unit/WorktreeManager.Tests.ps1`
+  - migration notes: `docs/migration/config-and-architecture-migration.md`
 
 ## 次の候補
 
-1. `WorktreeManager`
-2. `MessageBus`
-3. `StatuslineManager`
+1. `MessageBus`
+2. `StatuslineManager`
+3. `SessionTabManager`

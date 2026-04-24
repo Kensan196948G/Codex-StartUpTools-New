@@ -23,7 +23,6 @@
   - adapt default tool and examples for Codex-first operation
 - `docs/codex/*`
   - keep reusable guidance, remove references to disabled launcher paths
-- `scripts/lib/WorktreeManager.psm1`
 - `scripts/lib/MessageBus.psm1`
 - `scripts/lib/SessionTabManager.psm1`
 - `scripts/lib/StatuslineManager.psm1`
@@ -32,6 +31,7 @@
 
 - `scripts/lib/LogManager.psm1`
 - `scripts/lib/ErrorHandler.psm1`
+- `scripts/lib/WorktreeManager.psm1`
 
 ### Reference only
 
@@ -58,6 +58,7 @@
   - `ArchitectureCheck`
   - `LogManager`
   - `ErrorHandler`
+  - `WorktreeManager`
 - migrated tests:
   - `TokenBudget`
   - `Config`
@@ -66,11 +67,12 @@
   - `ArchitectureCheck`
   - `LogManager`
   - `ErrorHandler`
+  - `WorktreeManager`
 
 ## Next Migration Queue
 
-1. `WorktreeManager`
-2. `MessageBus`
-3. `StatuslineManager`
-4. `SessionTabManager`
-5. `Worktree`-adjacent launcher utilities
+1. `MessageBus`
+2. `StatuslineManager`
+3. `SessionTabManager`
+4. `Worktree`-adjacent launcher utilities
+5. `LauncherCommon`

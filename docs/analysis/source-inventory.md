@@ -43,3 +43,7 @@
   - 分類: そのまま移植
   - 理由: ログ運用と分類付きエラー処理は Claude ランタイムに依存しない
   - 検証: `tests/unit/LogManager.Tests.ps1`, `tests/unit/ErrorHandler.Tests.ps1`
+- `scripts/lib/WorktreeManager.psm1`
+  - 分類: そのまま移植
+  - 理由: Git worktree 管理は Codex 側でもそのまま利用価値が高い
+  - 検証: `tests/unit/WorktreeManager.Tests.ps1`
