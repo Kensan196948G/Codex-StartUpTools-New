@@ -27,6 +27,8 @@
 - `scripts/lib/McpHealthCheck.psm1`
 - `state.schema.json`
 - `state.json.example`
+- `scripts/main/Start-CodexBootstrap.ps1`
+- `scripts/main/Start-Codex.ps1`
 
 ### Migrate directly (additional completed slice)
 
@@ -69,6 +71,8 @@
   - `LauncherCommon`
   - `McpHealthCheck`
   - `StateSchema`
+  - `StartCodexBootstrap`
+  - `StartCodex`
 - migrated tests:
   - `TokenBudget`
   - `Config`
@@ -84,8 +88,8 @@
 
 ## Next Migration Queue
 
-1. `Start-*` 系エントリポイントの再構成
-2. `Start-ClaudeOS` 相当の Codex bootstrap 設計
-3. `CronManager` の要否再評価
-4. `Config` と起動エントリポイントの統合検証
-5. セッション開始前チェックの標準化
+1. `Start-ClaudeOS` 相当の Codex bootstrap 設計の拡張
+2. `CronManager` の要否再評価
+3. `Config` と起動エントリポイントの統合検証
+4. セッション開始前チェックの標準化
+5. 起動後ダッシュボードの最小構成追加

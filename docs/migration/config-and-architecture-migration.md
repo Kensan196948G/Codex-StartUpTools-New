@@ -51,13 +51,14 @@ Migrate the reusable configuration and architecture guard layers from the Claude
 - kept a small launcher-common subset for path, config, and drive-resolution behavior without carrying over the original full launcher stack
 - kept MCP diagnostics as a reduced inspection layer, excluding the original Claude-specific runtime orchestration
 - reduced `state.json` / `state.schema.json` to the minimum shape required by migrated Codex modules
+- replaced the old multi-tool `Start-*` launcher tree with a Codex bootstrap plus a single Codex entrypoint for local-first startup
 
 ## Verification Method
 
 Run:
 
 ```powershell
-Invoke-Pester .\tests\unit\TokenBudget.Tests.ps1, .\tests\unit\Config.Tests.ps1, .\tests\unit\ConfigSchema.Tests.ps1, .\tests\unit\RecentProjects.Tests.ps1, .\tests\unit\ArchitectureCheck.Tests.ps1, .\tests\unit\LogManager.Tests.ps1, .\tests\unit\ErrorHandler.Tests.ps1, .\tests\unit\WorktreeManager.Tests.ps1, .\tests\unit\MessageBus.Tests.ps1, .\tests\unit\StatuslineManager.Tests.ps1, .\tests\unit\SessionTabManager.Tests.ps1, .\tests\unit\LauncherCommon.Tests.ps1, .\tests\unit\McpHealthCheck.Tests.ps1, .\tests\unit\StateSchema.Tests.ps1
+Invoke-Pester .\tests\unit\TokenBudget.Tests.ps1, .\tests\unit\Config.Tests.ps1, .\tests\unit\ConfigSchema.Tests.ps1, .\tests\unit\RecentProjects.Tests.ps1, .\tests\unit\ArchitectureCheck.Tests.ps1, .\tests\unit\LogManager.Tests.ps1, .\tests\unit\ErrorHandler.Tests.ps1, .\tests\unit\WorktreeManager.Tests.ps1, .\tests\unit\MessageBus.Tests.ps1, .\tests\unit\StatuslineManager.Tests.ps1, .\tests\unit\SessionTabManager.Tests.ps1, .\tests\unit\LauncherCommon.Tests.ps1, .\tests\unit\McpHealthCheck.Tests.ps1, .\tests\unit\StateSchema.Tests.ps1, .\tests\unit\StartCodexBootstrap.Tests.ps1, .\tests\unit\StartCodex.Tests.ps1
 ```
 
 Expected:
@@ -74,3 +75,4 @@ Expected:
 - launcher path and SSH-drive resolution behavior remains verified
 - MCP argument escaping behavior remains verified
 - reduced state example remains compatible with `TokenBudget` and `MessageBus`
+- bootstrap and Codex entrypoint scripts remain dry-run and local-launch verifiable

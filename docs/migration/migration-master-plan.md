@@ -106,9 +106,13 @@
   - target artifacts: `state.schema.json`, `state.json.example`
   - verification: `tests/unit/StateSchema.Tests.ps1`
   - migration notes: `docs/migration/config-and-architecture-migration.md`
+- Codex startup entrypoints
+  - target artifacts: `scripts/main/Start-CodexBootstrap.ps1`, `scripts/main/Start-Codex.ps1`
+  - verification: `tests/unit/StartCodexBootstrap.Tests.ps1`, `tests/unit/StartCodex.Tests.ps1`
+  - migration notes: `docs/migration/config-and-architecture-migration.md`
 
 ## 次の候補
 
-1. `Start-*` 系エントリポイントの再構成
-2. `Start-ClaudeOS` 相当の Codex bootstrap 設計
-3. `CronManager` の要否再評価
+1. `Start-ClaudeOS` 相当の Codex bootstrap 設計の拡張
+2. `CronManager` の要否再評価
+3. `Config` と起動エントリポイントの統合検証

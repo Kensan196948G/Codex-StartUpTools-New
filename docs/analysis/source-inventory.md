@@ -71,3 +71,7 @@
   - 分類: 調整して移植
   - 理由: Claude 側の巨大 state モデルは持ち込まず、`TokenBudget` と `MessageBus` が必要とする最小項目へ縮小した
   - 検証: `tests/unit/StateSchema.Tests.ps1`
+- `scripts/main/Start-CodexBootstrap.ps1`, `scripts/main/Start-Codex.ps1`
+  - 分類: 調整して置換実装
+  - 理由: Claude 側の複数起動メニューをそのまま持ち込まず、Codex 向けの bootstrap と単一ローカル起動入口へ再構成した
+  - 検証: `tests/unit/StartCodexBootstrap.Tests.ps1`, `tests/unit/StartCodex.Tests.ps1`
