@@ -51,3 +51,7 @@
   - 分類: そのまま移植
   - 理由: state.json ベースの軽量メッセージ連携は Codex 側でも再利用しやすい
   - 検証: `tests/unit/MessageBus.Tests.ps1`
+- `scripts/lib/StatuslineManager.psm1`
+  - 分類: 調整して移植
+  - 理由: 設定読取はそのまま使えるが、同期先や運用前提は Codex 側に合わせて見直す必要がある
+  - 検証: `tests/unit/StatuslineManager.Tests.ps1`

@@ -86,9 +86,13 @@
   - target module: `scripts/lib/MessageBus.psm1`
   - verification: `tests/unit/MessageBus.Tests.ps1`
   - migration notes: `docs/migration/config-and-architecture-migration.md`
+- Statusline manager
+  - target module: `scripts/lib/StatuslineManager.psm1`
+  - verification: `tests/unit/StatuslineManager.Tests.ps1`
+  - migration notes: `docs/migration/config-and-architecture-migration.md`
 
 ## 次の候補
 
-1. `StatuslineManager`
-2. `SessionTabManager`
-3. `LauncherCommon`
+1. `SessionTabManager`
+2. `LauncherCommon`
+3. `McpHealthCheck`

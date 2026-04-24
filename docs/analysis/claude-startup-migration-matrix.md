@@ -24,7 +24,6 @@
 - `docs/codex/*`
   - keep reusable guidance, remove references to disabled launcher paths
 - `scripts/lib/SessionTabManager.psm1`
-- `scripts/lib/StatuslineManager.psm1`
 
 ### Migrate directly (additional completed slice)
 
@@ -32,6 +31,7 @@
 - `scripts/lib/ErrorHandler.psm1`
 - `scripts/lib/WorktreeManager.psm1`
 - `scripts/lib/MessageBus.psm1`
+- `scripts/lib/StatuslineManager.psm1`
 
 ### Reference only
 
@@ -60,6 +60,7 @@
   - `ErrorHandler`
   - `WorktreeManager`
   - `MessageBus`
+  - `StatuslineManager`
 - migrated tests:
   - `TokenBudget`
   - `Config`
@@ -70,11 +71,12 @@
   - `ErrorHandler`
   - `WorktreeManager`
   - `MessageBus`
+  - `StatuslineManager`
 
 ## Next Migration Queue
 
-1. `StatuslineManager`
-2. `SessionTabManager`
-3. `Worktree`-adjacent launcher utilities
-4. `LauncherCommon`
-5. `McpHealthCheck`
+1. `SessionTabManager`
+2. `LauncherCommon`
+3. `McpHealthCheck`
+4. `state.json` / `state.schema.json` の縮小設計
+5. `Start-*` 系エントリポイントの再構成
