@@ -802,8 +802,9 @@ function Invoke-LaunchAction {
         # codex に置き換わり、/dev/tty が正しく引き継がれる。
         $cleanPath   = $remotePath.Trim()
         $toolArgsStr = ($toolArgs | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) -join ' '
-        $profileSrc  = 'export TERM=xterm-256color; . ~/.bash_profile 2>/dev/null; . ~/.bashrc 2>/dev/null'
-        $remoteCmd   = ($profileSrc + '; cd "' + $cleanPath + '" && exec ' + $cmd + ' ' + $toolArgsStr).TrimEnd()
+        # wt.exe は ; をコマンド区切りとして解析するため && で結合する
+        $profileSrc  = 'export TERM=xterm-256color && . ~/.bash_profile 2>/dev/null && . ~/.bashrc 2>/dev/null'
+        $remoteCmd   = ($profileSrc + ' && cd "' + $cleanPath + '" && exec ' + $cmd + ' ' + $toolArgsStr).TrimEnd()
 
         Write-Host ("  SSH 接続: {0} -> {1}" -f $linuxHost, $cleanPath) -ForegroundColor Cyan
         Write-Host ("  コマンド: {0}" -f $remoteCmd) -ForegroundColor DarkGray
@@ -813,9 +814,10 @@ function Invoke-LaunchAction {
         $wt = Get-Command wt -ErrorAction SilentlyContinue
         if ($null -ne $wt) {
             # Windows Terminal が利用可能: 同ウィンドウの新規タブで非同期起動
-            # wt が独自の ConPTY を用意するため React-Ink TUI が正常に描画される
+            # wt の ConPTY が各タブに独立したターミナルを提供し TUI が正常描画される
+            # remote command の ; を && に統一し wt の ; コマンド区切り解析を回避済み
             $tabTitle = if ($project) { "Codex: $project" } else { 'Codex SSH' }
-            $wtArgList = @('new-tab', '--title', $tabTitle, '--') + $sshArgList
+            $wtArgList = @('new-tab', '--title', $tabTitle, '--', 'ssh') + $sshArgList
             Start-Process -FilePath $wt.Source -ArgumentList $wtArgList
             Write-Host "  新しいタブで起動しました。" -ForegroundColor Green
             Write-Host "  (タブを閉じるとセッションが終了します)" -ForegroundColor DarkGray
