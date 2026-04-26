@@ -36,7 +36,49 @@ if not exist "scripts\main\Start-Codex.ps1" (
     exit /b 1
 )
 
-:: ダッシュボード表示 + Codex 起動
+:: ============================================================
+:: 初回セットアップ: config.json がなければテンプレートから生成
+:: ============================================================
+if not exist "config\config.json" (
+    if exist "config\config.json.template" (
+        echo [SETUP] config\config.json が見つかりません。
+        echo         config\config.json.template からコピーして初期設定ファイルを作成します。
+        echo.
+        copy /Y "config\config.json.template" "config\config.json" >nul
+        if %errorLevel% EQU 0 (
+            echo [OK]    config\config.json を作成しました。
+            echo.
+            echo [NOTE]  必要に応じて config\config.json を編集してください:
+            echo          - projectsDir  : プロジェクトルートディレクトリ
+            echo          - linuxHost    : Linux ホスト名 ^(SSH 接続時^)
+            echo          - linuxBase    : Linux プロジェクトベースパス
+            echo.
+        ) else (
+            echo [ERROR] config.json のコピーに失敗しました。
+            pause
+            exit /b 1
+        )
+    ) else (
+        echo [ERROR] config\config.json.template が見つかりません。
+        echo         リポジトリが正しくクローンされているか確認してください。
+        pause
+        exit /b 1
+    )
+)
+
+:: ============================================================
+:: 初回セットアップ: state.json がなければ example から生成
+:: ============================================================
+if not exist "state.json" (
+    if exist "state.json.example" (
+        copy /Y "state.json.example" "state.json" >nul
+        echo [SETUP] state.json を state.json.example から作成しました。
+    )
+)
+
+:: ============================================================
+:: 起動
+:: ============================================================
 echo.
 echo  ============================================
 echo   Codex StartUp Tools
