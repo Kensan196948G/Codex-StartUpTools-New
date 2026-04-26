@@ -514,38 +514,124 @@ function Invoke-LaunchAction {
     )
 
     Write-Host ""
+
+    # ツール設定確認
     $toolConfig = $Config.tools.PSObject.Properties[$Tool]?.Value
     if (-not $toolConfig -or -not $toolConfig.enabled) {
-        Write-Host ("  [WARN] {0} は設定で無効化されています。" -f $Tool) -ForegroundColor Yellow
+        Write-Host ("  [WARN] {0} は config.json で無効化されています。" -f $Tool) -ForegroundColor Yellow
+        Write-Host "         config/config.json の tools.$Tool.enabled を true に変更してください。" -ForegroundColor DarkGray
+        Write-Host ""
         Wait-MenuInput
         return
     }
 
-    $cmd = $toolConfig.command
-    $args = @($toolConfig.args)
+    $cmd  = $toolConfig.command
+    $toolArgs = @($toolConfig.args)
+
+    # コマンド存在確認
+    if (-not (Get-Command $cmd -ErrorAction SilentlyContinue)) {
+        Write-Host ("  [ERROR] コマンドが見つかりません: {0}" -f $cmd) -ForegroundColor Red
+        Write-Host ("          インストールコマンド: {0}" -f $toolConfig.installCommand) -ForegroundColor Yellow
+        Write-Host ""
+        Wait-MenuInput
+        return
+    }
 
     if ($Mode -eq 'ssh') {
+        # ── SSH 起動 ────────────────────────────────────────
         $linuxHost = $Config.linuxHost
         $linuxBase = $Config.linuxBase
-        Write-Host ("  SSH 接続: {0}" -f $linuxHost) -ForegroundColor Cyan
-        Write-Host ("  ベースパス: {0}" -f $linuxBase) -ForegroundColor Cyan
+
+        if (-not $linuxHost -or $linuxHost -eq '<your-linux-host>') {
+            Write-Host "  [ERROR] config.json の linuxHost が未設定です。" -ForegroundColor Red
+            Wait-MenuInput
+            return
+        }
+
+        # プロジェクト選択
+        $project = Read-Host "  プロジェクト名を入力（空白 = ベースパスで起動）"
+        $remotePath = if ([string]::IsNullOrWhiteSpace($project)) {
+            $linuxBase
+        } else {
+            "$linuxBase/$project"
+        }
+
+        $sshOptions = @()
+        if ($Config.PSObject.Properties['ssh'] -and $Config.ssh.PSObject.Properties['options']) {
+            $sshOptions = @($Config.ssh.options)
+        }
+        if ('-t' -notin $sshOptions) {
+            $sshOptions = @('-t') + $sshOptions  # PTY 確保
+        }
+
+        $remoteCmd = "cd '$remotePath' && $cmd $($toolArgs -join ' ')"
+
+        Write-Host ("  SSH 接続: {0} -> {1}" -f $linuxHost, $remotePath) -ForegroundColor Cyan
+        Write-Host ("  コマンド: {0}" -f $remoteCmd) -ForegroundColor DarkGray
         Write-Host ""
-        Write-Host "  [INFO] SSH 起動機能は設定に応じて LauncherCommon で実装されます。" -ForegroundColor Yellow
-        Write-Host "         現在のバージョンではローカル起動にフォールバックします。" -ForegroundColor Yellow
+
+        # ssh -t $host "cd path && cmd args" — カレントプロセスで直接実行（TTY 継承）
+        & ssh @sshOptions $linuxHost $remoteCmd
+        $exitCode = $LASTEXITCODE
+
+    } else {
+        # ── ローカル起動 ────────────────────────────────────
+        $localBase = if ($Config.projectsDir) { $Config.projectsDir } else { 'D:\' }
+
+        # プロジェクト選択
+        Write-Host ("  ベースディレクトリ: {0}" -f $localBase) -ForegroundColor DarkGray
+        $project = Read-Host "  プロジェクト名を入力（空白 = ベースで起動）"
+        $workDir = if ([string]::IsNullOrWhiteSpace($project)) {
+            $localBase
+        } else {
+            Join-Path $localBase $project
+        }
+
+        if (-not (Test-Path $workDir)) {
+            Write-Host ("  [ERROR] ディレクトリが見つかりません: {0}" -f $workDir) -ForegroundColor Red
+            Write-Host ""
+            Wait-MenuInput
+            return
+        }
+
+        Write-Host ("  {0} を起動します: {1}" -f $cmd, $workDir) -ForegroundColor Green
         Write-Host ""
+
+        $previous = Get-Location
+        try {
+            Set-Location $workDir
+
+            # ★ カレントプロセスで直接実行（新 pwsh サブプロセスを作らない = TTY が継承される）
+            & $cmd @toolArgs
+            $exitCode = $LASTEXITCODE
+        }
+        finally {
+            Set-Location $previous
+        }
     }
 
-    Write-Host ("  {0} を起動します..." -f $Tool) -ForegroundColor Green
     Write-Host ""
+    if ($exitCode -ne 0) {
+        Write-Host ("  [WARN] {0} が終了コード {1} で終了しました。" -f $cmd, $exitCode) -ForegroundColor Yellow
+    } else {
+        Write-Host ("  {0} が正常に終了しました。" -f $cmd) -ForegroundColor Green
+    }
 
-    $launcherScript = Join-Path $ProjectRoot "scripts\main\Start-Codex.ps1"
-    if (Test-Path $launcherScript) {
-        & pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File $launcherScript
+    # RecentProjects 更新（エラーは無視）
+    try {
+        $historyPath = $Config.recentProjects.historyFile
+        if ($historyPath -and $Config.recentProjects.enabled) {
+            $historyPath = [System.Environment]::ExpandEnvironmentVariables($historyPath)
+            $result = if ($exitCode -eq 0) { 'success' } else { 'failure' }
+            $projName = if ($project) { $project } else { 'default' }
+            Update-RecentProject -ProjectName $projName -Tool $Tool -Mode $Mode `
+                -Result $result -ElapsedMs 0 `
+                -HistoryPath $historyPath -MaxHistory $Config.recentProjects.maxHistory `
+                -ErrorAction SilentlyContinue
+        }
     }
-    else {
-        Write-Host ("  [INFO] コマンド: {0} {1}" -f $cmd, ($args -join ' ')) -ForegroundColor DarkGray
-        Write-Host "  [ERROR] ランチャースクリプトが見つかりません。" -ForegroundColor Red
-    }
+    catch { }
+
     Write-Host ""
     Wait-MenuInput
 }
