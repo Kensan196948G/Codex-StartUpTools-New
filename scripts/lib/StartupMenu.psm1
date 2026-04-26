@@ -789,13 +789,16 @@ function Invoke-LaunchAction {
             $sshOptions = @('-t') + $sshOptions  # PTY 確保
         }
 
-        $remoteCmd = "cd '$remotePath' && $cmd $($toolArgs -join ' ')"
+        # bash -l -c でログインシェルを起動 → .profile/.bash_profile が読まれ
+        # npm/nvm 等でインストールした codex が PATH に含まれる
+        $innerCmd  = "cd '$remotePath' && $cmd $($toolArgs -join ' ')"
+        $remoteCmd = "bash -l -c '$innerCmd'"
 
         Write-Host ("  SSH 接続: {0} -> {1}" -f $linuxHost, $remotePath) -ForegroundColor Cyan
-        Write-Host ("  コマンド: {0}" -f $remoteCmd) -ForegroundColor DarkGray
+        Write-Host ("  コマンド: {0}" -f $innerCmd) -ForegroundColor DarkGray
         Write-Host ""
 
-        # ssh -t $host "cd path && cmd args" — カレントプロセスで直接実行（TTY 継承）
+        # ssh -t $host "bash -l -c '...'" — ログイン環境 + PTY で起動
         & ssh @sshOptions $linuxHost $remoteCmd
         $exitCode = $LASTEXITCODE
 
