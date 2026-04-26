@@ -25,6 +25,7 @@ jobs:
       - name: Run Unit Tests
         shell: pwsh
         run: |
+          Import-Module Pester -MinimumVersion 5.0 -Force
           $config = New-PesterConfiguration
           $config.Run.Path = "tests/unit"
           $config.Output.Verbosity = "Detailed"
