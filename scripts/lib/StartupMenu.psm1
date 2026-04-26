@@ -808,15 +808,24 @@ function Invoke-LaunchAction {
         Write-Host ("  SSH 接続: {0} -> {1}" -f $linuxHost, $cleanPath) -ForegroundColor Cyan
         Write-Host ("  コマンド: {0}" -f $remoteCmd) -ForegroundColor DarkGray
         Write-Host ""
-        Write-Host "  新しいウィンドウで起動します。終了すると自動的に閉じます。" -ForegroundColor DarkGray
-        Write-Host ""
 
-        # PowerShell の親プロセスがコンソールモードを保持していると React-Ink 系
-        # TUI の raw mode 取得が競合し描画されない。Start-Process で新ウィンドウを
-        # 生成することで SSH が独立したコンソールを得て TUI が正常に動作する。
         $sshArgList = $sshOptions + @($linuxHost, $remoteCmd)
-        $proc = Start-Process -FilePath 'ssh' -ArgumentList $sshArgList -Wait -PassThru
-        $exitCode = if ($null -ne $proc) { $proc.ExitCode } else { 1 }
+        $wt = Get-Command wt -ErrorAction SilentlyContinue
+        if ($null -ne $wt) {
+            # Windows Terminal が利用可能: 同ウィンドウの新規タブで非同期起動
+            # wt が独自の ConPTY を用意するため React-Ink TUI が正常に描画される
+            $tabTitle = if ($project) { "Codex: $project" } else { 'Codex SSH' }
+            $wtArgList = @('new-tab', '--title', $tabTitle, '--') + $sshArgList
+            Start-Process -FilePath $wt.Source -ArgumentList $wtArgList
+            Write-Host "  新しいタブで起動しました。" -ForegroundColor Green
+            Write-Host "  (タブを閉じるとセッションが終了します)" -ForegroundColor DarkGray
+            $exitCode = 0
+        } else {
+            # フォールバック: 新しいウィンドウで同期起動
+            Write-Host "  新しいウィンドウで起動します。" -ForegroundColor DarkGray
+            $proc = Start-Process -FilePath 'ssh' -ArgumentList $sshArgList -Wait -PassThru
+            $exitCode = if ($null -ne $proc) { $proc.ExitCode } else { 1 }
+        }
 
     } else {
         # ── ローカル起動 ────────────────────────────────────
