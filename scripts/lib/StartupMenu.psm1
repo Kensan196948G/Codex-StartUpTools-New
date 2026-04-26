@@ -562,7 +562,7 @@ function Get-SshProjectList {
 
     try {
         # stderr を表示（接続エラーをユーザーに見せる）
-        $rawOutput = & ssh @sshOpts $LinuxHost "ls -1 '$LinuxBase' 2>/dev/null"
+        $rawOutput = & ssh @sshOpts $LinuxHost "ls -1d '$LinuxBase'/*/ 2>/dev/null | xargs -I{} basename {}"
         $exitCode  = $LASTEXITCODE
 
         if ($exitCode -ne 0 -or -not $rawOutput) {
