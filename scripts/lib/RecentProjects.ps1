@@ -1,3 +1,5 @@
+Set-StrictMode -Version Latest
+
 function Get-RecentProject {
     [CmdletBinding()]
     [OutputType([System.Object[]])]

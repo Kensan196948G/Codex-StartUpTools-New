@@ -1,3 +1,5 @@
+Set-StrictMode -Version Latest
+
 $script:RequiredFields = @("version", "linuxHost", "tools")
 $script:TemplateRequiredFields = @("version", "projectsDir", "sshProjectsDir", "projectsDirUnc", "linuxHost", "linuxBase", "tools")
 $script:TemplateToolRequiredFields = @{

@@ -45,11 +45,8 @@ $script:ForbiddenPatterns = @(
 )
 
 $script:ModuleDependencyRules = @{
-    "Start-ClaudeCode.ps1" = @("LauncherCommon.psm1", "Config.psm1")
-    "Start-CodexCLI.ps1"   = @("LauncherCommon.psm1", "Config.psm1")
-    "Start-CopilotCLI.ps1" = @("LauncherCommon.psm1", "Config.psm1")
-    "Start-Menu.ps1"       = @("LauncherCommon.psm1", "Config.psm1", "MenuCommon.psm1")
-    "Test-AllTools.ps1"    = @("Config.psm1", "LauncherCommon.psm1", "McpHealthCheck.psm1")
+    "Start-Codex.ps1"          = @("LauncherCommon.psm1", "Config.psm1", "LogManager.psm1", "ErrorHandler.psm1")
+    "Start-CodexBootstrap.ps1" = @("LauncherCommon.psm1", "Config.psm1", "TokenBudget.psm1", "McpHealthCheck.psm1", "MessageBus.psm1", "LogManager.psm1", "ErrorHandler.psm1")
 }
 
 function Get-ProjectRoot {
