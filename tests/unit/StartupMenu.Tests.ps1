@@ -149,3 +149,76 @@ Describe "Invoke-MenuAction (exit)" {
         $result | Should -BeTrue
     }
 }
+
+Describe "Get-LocalProjectList" {
+    It "有効なディレクトリでサブフォルダ一覧を返す" {
+        $dir = $TestDrive
+        New-Item -ItemType Directory -Path (Join-Path $dir "ProjectA") | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $dir "ProjectB") | Out-Null
+        New-Item -ItemType File      -Path (Join-Path $dir "readme.txt") | Out-Null
+
+        $result = @(Get-LocalProjectList -BaseDir $dir)
+        $result | Should -Contain "ProjectA"
+        $result | Should -Contain "ProjectB"
+        $result | Should -Not -Contain "readme.txt"
+    }
+
+    It "存在しないディレクトリでは空配列を返す" {
+        $result = @(Get-LocalProjectList -BaseDir "C:\nonexistent\xyz\abc")
+        $result.Count | Should -Be 0
+    }
+
+    It "隠しディレクトリ（.dotdir）を除外する" {
+        $dir = Join-Path $TestDrive "hidden_test"
+        New-Item -ItemType Directory -Path $dir | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $dir ".hidden") | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $dir "Visible") | Out-Null
+
+        $result = @(Get-LocalProjectList -BaseDir $dir)
+        $result | Should -Not -Contain ".hidden"
+        $result | Should -Contain "Visible"
+    }
+
+    It "MaxCount でリストを制限できる" {
+        $dir = Join-Path $TestDrive "maxcount_test"
+        New-Item -ItemType Directory -Path $dir | Out-Null
+        1..10 | ForEach-Object {
+            New-Item -ItemType Directory -Path (Join-Path $dir "Proj$_") | Out-Null
+        }
+
+        $result = @(Get-LocalProjectList -BaseDir $dir -MaxCount 5)
+        $result.Count | Should -Be 5
+    }
+
+    It "返り値はソート済みである" {
+        $dir = Join-Path $TestDrive "sort_test"
+        New-Item -ItemType Directory -Path $dir | Out-Null
+        @("Zebra", "Alpha", "Mango") | ForEach-Object {
+            New-Item -ItemType Directory -Path (Join-Path $dir $_) | Out-Null
+        }
+
+        $result = @(Get-LocalProjectList -BaseDir $dir)
+        $result[0] | Should -Be "Alpha"
+        $result[1] | Should -Be "Mango"
+        $result[2] | Should -Be "Zebra"
+    }
+}
+
+Describe "Get-RecentProjectNames" {
+    It "ヒストリファイルが存在しない場合は空配列を返す" {
+        $result = @(Get-RecentProjectNames -HistoryPath "C:\nonexistent\history.json")
+        $result.Count | Should -Be 0
+    }
+
+    It "ヒストリファイルが空文字列の場合は空配列を返す" {
+        $result = @(Get-RecentProjectNames -HistoryPath "")
+        $result.Count | Should -Be 0
+    }
+}
+
+Describe "Get-SshProjectList" {
+    It "接続できないホストでは空配列を返す（タイムアウト）" {
+        $result = @(Get-SshProjectList -LinuxHost "240.0.0.1" -LinuxBase "/home/test" -TimeoutSeconds 2)
+        $result.Count | Should -Be 0
+    }
+}
