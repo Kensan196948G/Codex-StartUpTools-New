@@ -808,10 +808,15 @@ function Invoke-LaunchAction {
         Write-Host ("  SSH 接続: {0} -> {1}" -f $linuxHost, $cleanPath) -ForegroundColor Cyan
         Write-Host ("  コマンド: {0}" -f $remoteCmd) -ForegroundColor DarkGray
         Write-Host ""
+        Write-Host "  新しいウィンドウで起動します。終了すると自動的に閉じます。" -ForegroundColor DarkGray
+        Write-Host ""
 
-        # ssh -t $host "bash -l -c '...'" — ログイン環境 + PTY で起動
-        & ssh @sshOptions $linuxHost $remoteCmd
-        $exitCode = $LASTEXITCODE
+        # PowerShell の親プロセスがコンソールモードを保持していると React-Ink 系
+        # TUI の raw mode 取得が競合し描画されない。Start-Process で新ウィンドウを
+        # 生成することで SSH が独立したコンソールを得て TUI が正常に動作する。
+        $sshArgList = $sshOptions + @($linuxHost, $remoteCmd)
+        $proc = Start-Process -FilePath 'ssh' -ArgumentList $sshArgList -Wait -PassThru
+        $exitCode = if ($null -ne $proc) { $proc.ExitCode } else { 1 }
 
     } else {
         # ── ローカル起動 ────────────────────────────────────
