@@ -505,6 +505,208 @@ function Invoke-MessageBusAction {
     Wait-MenuInput
 }
 
+# ---------------------------------------------------------------
+# プロジェクト選択
+# ---------------------------------------------------------------
+
+function Get-LocalProjectList {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$BaseDir,
+
+        [int]$MaxCount = 40
+    )
+
+    if (-not (Test-Path $BaseDir)) {
+        return @()
+    }
+
+    return @(
+        Get-ChildItem -Path $BaseDir -Directory -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -notmatch '^\.' } |
+            Sort-Object Name |
+            Select-Object -First $MaxCount |
+            ForEach-Object { $_.Name }
+    )
+}
+
+function Get-SshProjectList {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$LinuxHost,
+
+        [Parameter(Mandatory)]
+        [string]$LinuxBase,
+
+        [int]$TimeoutSeconds = 5,
+        [int]$MaxCount = 40
+    )
+
+    try {
+        $rawOutput = & ssh -o "ConnectTimeout=$TimeoutSeconds" -o BatchMode=yes `
+            $LinuxHost "ls -1 '$LinuxBase' 2>/dev/null" 2>$null
+        if ($LASTEXITCODE -ne 0 -or -not $rawOutput) {
+            return @()
+        }
+
+        return @($rawOutput |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+            Select-Object -First $MaxCount)
+    }
+    catch {
+        return @()
+    }
+}
+
+function Get-RecentProjectNames {
+    [CmdletBinding()]
+    param(
+        [string]$HistoryPath,
+        [string]$Tool = '',
+        [string]$Mode = '',
+        [int]$MaxCount = 5
+    )
+
+    if (-not $HistoryPath -or -not (Test-Path $HistoryPath)) {
+        return @()
+    }
+
+    try {
+        $historyPath = [System.Environment]::ExpandEnvironmentVariables($HistoryPath)
+        $entries = @(Get-RecentProject -HistoryPath $historyPath -ErrorAction SilentlyContinue)
+
+        if ($Tool) {
+            $entries = @($entries | Where-Object { $_.tool -eq $Tool })
+        }
+        if ($Mode) {
+            $entries = @($entries | Where-Object { $_.mode -eq $Mode })
+        }
+
+        return @(
+            $entries |
+                Select-Object -ExpandProperty project -Unique |
+                Select-Object -First $MaxCount
+        )
+    }
+    catch {
+        return @()
+    }
+}
+
+function Show-ProjectSelector {
+    [CmdletBinding()]
+    param(
+        [string[]]$RecentProjects = @(),
+        [string[]]$AllProjects    = @(),
+        [string]$BaseLabel        = ""
+    )
+
+    $listed   = [System.Collections.Generic.List[string]]::new()
+    $indexMap = @{}  # 番号 -> プロジェクト名
+
+    Write-Host ""
+
+    # 最近使ったプロジェクト（先頭に表示）
+    if ($RecentProjects.Count -gt 0) {
+        Write-Host "  ★ 最近使ったプロジェクト:" -ForegroundColor Yellow
+        foreach ($p in $RecentProjects) {
+            if ($p -notin $listed) {
+                $num = $listed.Count + 1
+                $listed.Add($p)
+                $indexMap[$num] = $p
+                Write-Host ("    {0,2}. {1}" -f $num, $p) -ForegroundColor White
+            }
+        }
+        Write-Host ""
+    }
+
+    # 全プロジェクト一覧（重複除外）
+    $remaining = @($AllProjects | Where-Object { $_ -notin $listed })
+    if ($remaining.Count -gt 0) {
+        if ($RecentProjects.Count -gt 0) {
+            Write-Host "  ── その他のプロジェクト ──" -ForegroundColor DarkGray
+        } else {
+            Write-Host "  プロジェクト一覧:" -ForegroundColor Cyan
+            if ($BaseLabel) {
+                Write-Host ("  ベース: {0}" -f $BaseLabel) -ForegroundColor DarkGray
+            }
+        }
+        foreach ($p in $remaining) {
+            $num = $listed.Count + 1
+            $listed.Add($p)
+            $indexMap[$num] = $p
+            Write-Host ("    {0,2}. {1}" -f $num, $p) -ForegroundColor DarkGray
+        }
+        Write-Host ""
+    }
+
+    if ($listed.Count -eq 0) {
+        Write-Host "  (プロジェクトが見つかりませんでした)" -ForegroundColor DarkGray
+        Write-Host ""
+    }
+
+    Write-Host "     0.  ベースパスで起動（プロジェクト指定なし）" -ForegroundColor DarkGray
+    Write-Host ""
+
+    # 選択入力
+    $choice = (Read-Host "  番号を選択（または直接プロジェクト名を入力）").Trim()
+
+    if ([string]::IsNullOrWhiteSpace($choice) -or $choice -eq '0') {
+        return ''
+    }
+
+    # 数字ならインデックス変換
+    if ($choice -match '^\d+$') {
+        $idx = [int]$choice
+        if ($indexMap.ContainsKey($idx)) {
+            return $indexMap[$idx]
+        }
+    }
+
+    # そのままプロジェクト名として扱う（直接テキスト入力）
+    return $choice
+}
+
+function Select-ProjectInteractive {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [object]$Config,
+
+        [string]$Mode      = 'local',
+        [string]$Tool      = 'codex'
+    )
+
+    $historyPath = $Config.recentProjects.historyFile
+
+    if ($Mode -eq 'ssh') {
+        $linuxHost = $Config.linuxHost
+        $linuxBase = $Config.linuxBase
+
+        Write-Host "  SSH プロジェクト一覧を取得中 ($linuxHost)..." -ForegroundColor DarkGray
+        $allProjects    = @(Get-SshProjectList -LinuxHost $linuxHost -LinuxBase $linuxBase)
+        $recentProjects = @(Get-RecentProjectNames -HistoryPath $historyPath -Tool $Tool -Mode 'ssh')
+
+        return Show-ProjectSelector `
+            -RecentProjects $recentProjects `
+            -AllProjects    $allProjects `
+            -BaseLabel      "${linuxHost}:$linuxBase"
+    }
+    else {
+        $localBase = if ($Config.projectsDir) { $Config.projectsDir } else { 'D:\' }
+
+        $allProjects    = @(Get-LocalProjectList -BaseDir $localBase)
+        $recentProjects = @(Get-RecentProjectNames -HistoryPath $historyPath -Tool $Tool -Mode 'local')
+
+        return Show-ProjectSelector `
+            -RecentProjects $recentProjects `
+            -AllProjects    $allProjects `
+            -BaseLabel      $localBase
+    }
+}
+
 function Invoke-LaunchAction {
     param(
         [object]$Config,
@@ -548,8 +750,8 @@ function Invoke-LaunchAction {
             return
         }
 
-        # プロジェクト選択
-        $project = Read-Host "  プロジェクト名を入力（空白 = ベースパスで起動）"
+        # プロジェクト選択（一覧表示）
+        $project    = Select-ProjectInteractive -Config $Config -Mode 'ssh' -Tool $Tool
         $remotePath = if ([string]::IsNullOrWhiteSpace($project)) {
             $linuxBase
         } else {
@@ -578,9 +780,8 @@ function Invoke-LaunchAction {
         # ── ローカル起動 ────────────────────────────────────
         $localBase = if ($Config.projectsDir) { $Config.projectsDir } else { 'D:\' }
 
-        # プロジェクト選択
-        Write-Host ("  ベースディレクトリ: {0}" -f $localBase) -ForegroundColor DarkGray
-        $project = Read-Host "  プロジェクト名を入力（空白 = ベースで起動）"
+        # プロジェクト選択（ディレクトリ一覧表示）
+        $project = Select-ProjectInteractive -Config $Config -Mode 'local' -Tool $Tool
         $workDir = if ([string]::IsNullOrWhiteSpace($project)) {
             $localBase
         } else {
@@ -704,5 +905,10 @@ Export-ModuleMember -Function @(
     'Read-MenuChoice',
     'Invoke-MenuAction',
     'Start-InteractiveMenu',
-    'Wait-MenuInput'
+    'Wait-MenuInput',
+    'Get-LocalProjectList',
+    'Get-SshProjectList',
+    'Get-RecentProjectNames',
+    'Show-ProjectSelector',
+    'Select-ProjectInteractive'
 )
