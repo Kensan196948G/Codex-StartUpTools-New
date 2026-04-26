@@ -183,4 +183,18 @@
 
 ---
 
+---
+
+## ProjectDashboard.psm1
+
+| 項目 | 内容 |
+|---|---|
+| **分類** | 🔄 置換実装（Codex ネイティブ新規） |
+| **元の対応** | 参照フォルダの `Start-Menu.ps1`・`Show-SessionInfoTab.ps1` の一部機能 |
+| **移植理由** | 起動後ダッシュボードの最小構成。Git 状態・テスト件数・token残量・フェーズを一覧表示 |
+| **差異** | Claude 専用の重厚な MenuCommon.psm1 依存を排除し、既存モジュール（TokenBudget・MessageBus等）を組み合わせた軽量実装 |
+| **検証** | `tests/unit/ProjectDashboard.Tests.ps1`（22 件） |
+
+---
+
 *最終更新: 2026-04-26*

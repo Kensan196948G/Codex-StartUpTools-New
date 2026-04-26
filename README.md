@@ -62,6 +62,7 @@ graph TD
         M[StatuslineManager.psm1]
         N[WorktreeManager.psm1]
         O[ArchitectureCheck.psm1]
+        R[ProjectDashboard.psm1]
     end
 
     subgraph 設定・状態
@@ -87,6 +88,9 @@ graph TD
     D --> P
     F --> Q
     H --> Q
+    R --> F
+    R --> H
+    R --> Q
 ```
 
 ---
@@ -122,6 +126,55 @@ graph TD
 | `StatuslineManager.psm1` | ステータスライン表示制御 |
 | `WorktreeManager.psm1` | Git worktree の作成・切替・削除 |
 | `ArchitectureCheck.psm1` | プロジェクト構成の整合性チェック |
+| `ProjectDashboard.psm1` | 起動後ダッシュボード（Git・テスト・token・フェーズ状態を一覧表示） |
+
+---
+
+## 📊 ProjectDashboard
+
+起動後にプロジェクトの健全性を一目で確認できるダッシュボード機能です。
+
+```powershell
+Import-Module scripts/lib/ProjectDashboard.psm1
+Show-ProjectDashboard -ProjectRoot .
+```
+
+**出力例:**
+
+```
+=== Codex StartUp Dashboard ===
+  Project  : Codex-StartUpTools-New
+  Root     : D:\Codex-StartUpTools-New
+  Time     : 2026-04-26 18:00:00
+
+  Git
+    Branch : main  (clean)
+    Last   : Merge pull request #7 ...
+    Age    : 5 minutes ago
+
+  Tests
+    Files  : 17 test files
+    Last   : 152 tests in last run
+
+  State
+    Phase  : Improve
+    Stable : [STABLE]
+    Goal   : Codex StartUp migration execution
+
+  Token
+    Used   : 35%  Zone: Green
+    Left   : 65%
+===============================
+```
+
+| 関数 | 説明 |
+|---|---|
+| `Get-ProjectDashboardInfo` | ダッシュボード情報をオブジェクトで返す（テスト可能） |
+| `Get-DashboardGitInfo` | Git 状態のみ収集 |
+| `Get-DashboardTestInfo` | テストファイル数・直近実行結果 |
+| `Get-DashboardTokenInfo` | token 残量とゾーン（Green/Yellow/Orange/Red） |
+| `Get-DashboardPhaseInfo` | 実行フェーズ・STABLE 状態・ゴール |
+| `Show-ProjectDashboard` | コンソールに整形表示（-Compact でコンパクト表示） |
 
 ---
 
@@ -307,10 +360,10 @@ flowchart TD
 | 項目 | 状態 |
 |---|---|
 | STABLE 達成 | ✅ 2026-04-26 |
-| ユニットテスト | ✅ 130/130 通過 |
+| ユニットテスト | ✅ 152/152 通過 |
 | CI (GitHub Actions) | ✅ 全ジョブ通過 |
 | ArchitectureCheck | ✅ CRITICAL=0 WARNING=0 |
-| 移植済みモジュール | 16 モジュール |
+| 移植済みモジュール | 17 モジュール |
 | 移植メモ | `docs/migration/modules.md` |
 
 ### 直近のループ成果
@@ -320,6 +373,7 @@ flowchart TD
 | Loop 1 | GitHub Actions CI 整備、README 大幅改善、.gitignore 整理 |
 | Loop 2 | 移植メモ作成（docs/migration/modules.md）、ArchitectureCheck テスト強化（+8件） |
 | Loop 3 | StrictMode 追加、依存ルール実態整合、CI Node.js 24 対応 |
+| Loop 4 | ProjectDashboard.psm1 新規実装（+22テスト）、GitHub Projects・マイルストーン整備 |
 
 ---
 
