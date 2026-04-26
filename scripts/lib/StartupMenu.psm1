@@ -825,9 +825,12 @@ function Invoke-LaunchAction {
                 "'@"
                 'Remove-Item -LiteralPath $PSCommandPath -ErrorAction SilentlyContinue'
             ) | Set-Content -Path $tmpScript -Encoding UTF8
-            $wtArgList = @('-w', 'last', 'new-tab', '--title', $tabTitle,
-                           '--', 'pwsh', '-NoLogo', '-NoProfile', '-File', $tmpScript)
-            Start-Process -FilePath $wt.Source -ArgumentList $wtArgList
+            # Start-Process -ArgumentList array はスペース入り値を自動クォートしない
+            # 単一文字列で渡すと CreateProcess にそのまま転送され WT が正しく解析する
+            $safeTitle = $tabTitle.Replace('"', '\"')
+            $safePath  = $tmpScript.Replace('"', '\"')
+            $wtArgStr  = "-w last new-tab --title `"$safeTitle`" -- pwsh -NoLogo -NoProfile -File `"$safePath`""
+            Start-Process -FilePath $wt.Source -ArgumentList $wtArgStr
             Write-Host "  新しいタブで起動しました。" -ForegroundColor Green
             Write-Host "  (タブを閉じるとセッションが終了します)" -ForegroundColor DarkGray
             $exitCode = 0
