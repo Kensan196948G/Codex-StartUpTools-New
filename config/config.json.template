@@ -40,7 +40,7 @@
   "ssh": {
     "autoCleanup": true,
     "options": [
-      "-t"
+      "-tt"
     ]
   },
   "logging": {

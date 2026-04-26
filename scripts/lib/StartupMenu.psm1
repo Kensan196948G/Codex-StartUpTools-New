@@ -786,8 +786,12 @@ function Invoke-LaunchAction {
         if ($Config.PSObject.Properties['ssh'] -and $Config.ssh.PSObject.Properties['options']) {
             $sshOptions = @($Config.ssh.options)
         }
-        if ('-t' -notin $sshOptions) {
-            $sshOptions = @('-t') + $sshOptions  # PTY 確保
+        # Windows PowerShell から子プロセス経由で ssh を呼ぶと stdin がパイプ扱いになり
+        # -t だけでは "stdin is not a terminal" で PTY 確保に失敗する。
+        # -tt は stdin が TTY でなくても強制的に PTY を割り当てる。
+        $sshOptions = @($sshOptions | Where-Object { $_ -ne '-t' })
+        if ('-tt' -notin $sshOptions) {
+            $sshOptions = @('-tt') + $sshOptions
         }
 
         # SSH ls 出力が CRLF を含む場合に備え Trim() でパスをクリーンにする
