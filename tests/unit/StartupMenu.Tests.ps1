@@ -217,8 +217,13 @@ Describe "Get-RecentProjectNames" {
 }
 
 Describe "Get-SshProjectList" {
-    It "接続できないホストでは空配列を返す（タイムアウト）" {
-        $result = @(Get-SshProjectList -LinuxHost "240.0.0.1" -LinuxBase "/home/test" -TimeoutSeconds 2)
+    It "接続できないホストでは空配列を返す（BatchMode + タイムアウト）" {
+        $result = @(Get-SshProjectList -LinuxHost "240.0.0.1" -LinuxBase "/home/test" -TimeoutSeconds 2 -BatchMode)
+        $result.Count | Should -Be 0
+    }
+
+    It "linuxBase がテンプレートデフォルト値の場合は空配列を返す" {
+        $result = @(Get-SshProjectList -LinuxHost "anyhost" -LinuxBase "/home/user/Projects" -BatchMode)
         $result.Count | Should -Be 0
     }
 }
