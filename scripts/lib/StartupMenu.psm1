@@ -575,6 +575,7 @@ function Get-SshProjectList {
 
         return @($rawOutput |
             Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+            ForEach-Object { $_.Trim() } |
             Select-Object -First $MaxCount)
     }
     catch {
@@ -789,15 +790,15 @@ function Invoke-LaunchAction {
             $sshOptions = @('-t') + $sshOptions  # PTY 確保
         }
 
+        # SSH ls 出力が CRLF を含む場合に備え Trim() でパスをクリーンにする
         # bash -l -c でログインシェルを起動 → .profile/.bash_profile が読まれ
         # npm/nvm 等でインストールした codex が PATH に含まれる
-        # 内側をダブルクォートで囲み、外側をシングルクォートにすることで
-        # パスにスペースが含まれても正しく処理され、クォート衝突を防ぐ
-        $toolArgsStr = $toolArgs -join ' '
-        $innerCmd    = 'cd "' + $remotePath + '" && ' + $cmd + ' ' + $toolArgsStr
+        $cleanPath   = $remotePath.Trim()
+        $toolArgsStr = ($toolArgs | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) -join ' '
+        $innerCmd    = ('cd "' + $cleanPath + '" && ' + $cmd + ' ' + $toolArgsStr).TrimEnd()
         $remoteCmd   = "bash -l -c '$innerCmd'"
 
-        Write-Host ("  SSH 接続: {0} -> {1}" -f $linuxHost, $remotePath) -ForegroundColor Cyan
+        Write-Host ("  SSH 接続: {0} -> {1}" -f $linuxHost, $cleanPath) -ForegroundColor Cyan
         Write-Host ("  コマンド: {0}" -f $innerCmd) -ForegroundColor DarkGray
         Write-Host ""
 
