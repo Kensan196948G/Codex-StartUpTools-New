@@ -540,14 +540,36 @@ function Get-SshProjectList {
         [Parameter(Mandatory)]
         [string]$LinuxBase,
 
-        [int]$TimeoutSeconds = 5,
-        [int]$MaxCount = 40
+        [int]$TimeoutSeconds = 8,
+        [int]$MaxCount = 40,
+
+        # テスト用: BatchMode=yes で強制（パスワードプロンプトを出さない）
+        [switch]$BatchMode
     )
 
+    $sshOpts = @("-o", "ConnectTimeout=$TimeoutSeconds")
+    if ($BatchMode) {
+        $sshOpts += @("-o", "BatchMode=yes")
+    }
+
+    # テンプレートデフォルト値チェック
+    if ($LinuxBase -eq '/home/user/Projects') {
+        Write-Host "  [WARN] config.json の linuxBase がテンプレートのままです。" -ForegroundColor Yellow
+        Write-Host "         config/config.json の linuxBase を実際のパスに変更してください。" -ForegroundColor Yellow
+        Write-Host ""
+        return @()
+    }
+
     try {
-        $rawOutput = & ssh -o "ConnectTimeout=$TimeoutSeconds" -o BatchMode=yes `
-            $LinuxHost "ls -1 '$LinuxBase' 2>/dev/null" 2>$null
-        if ($LASTEXITCODE -ne 0 -or -not $rawOutput) {
+        # stderr を表示（接続エラーをユーザーに見せる）
+        $rawOutput = & ssh @sshOpts $LinuxHost "ls -1 '$LinuxBase' 2>/dev/null"
+        $exitCode  = $LASTEXITCODE
+
+        if ($exitCode -ne 0 -or -not $rawOutput) {
+            if ($exitCode -ne 0) {
+                Write-Host ("  [WARN] SSH 接続失敗（終了コード {0}）" -f $exitCode) -ForegroundColor Yellow
+                Write-Host "         手動でプロジェクト名を入力してください。" -ForegroundColor DarkGray
+            }
             return @()
         }
 
@@ -556,6 +578,7 @@ function Get-SshProjectList {
             Select-Object -First $MaxCount)
     }
     catch {
+        Write-Host ("  [WARN] SSH 一覧取得エラー: {0}" -f $_.Exception.Message) -ForegroundColor Yellow
         return @()
     }
 }
