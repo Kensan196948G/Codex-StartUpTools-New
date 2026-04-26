@@ -791,8 +791,11 @@ function Invoke-LaunchAction {
 
         # bash -l -c でログインシェルを起動 → .profile/.bash_profile が読まれ
         # npm/nvm 等でインストールした codex が PATH に含まれる
-        $innerCmd  = "cd '$remotePath' && $cmd $($toolArgs -join ' ')"
-        $remoteCmd = "bash -l -c '$innerCmd'"
+        # 内側をダブルクォートで囲み、外側をシングルクォートにすることで
+        # パスにスペースが含まれても正しく処理され、クォート衝突を防ぐ
+        $toolArgsStr = $toolArgs -join ' '
+        $innerCmd    = 'cd "' + $remotePath + '" && ' + $cmd + ' ' + $toolArgsStr
+        $remoteCmd   = "bash -l -c '$innerCmd'"
 
         Write-Host ("  SSH 接続: {0} -> {1}" -f $linuxHost, $remotePath) -ForegroundColor Cyan
         Write-Host ("  コマンド: {0}" -f $innerCmd) -ForegroundColor DarkGray
