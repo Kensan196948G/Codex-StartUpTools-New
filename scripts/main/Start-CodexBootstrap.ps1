@@ -315,6 +315,52 @@ function Get-BootstrapLogProjectName {
     return "bootstrap"
 }
 
+function Initialize-BootstrapConfig {
+    param(
+        [Parameter(Mandatory)]
+        [string]$ConfigPath,
+
+        [switch]$PreviewOnly
+    )
+
+    if (Test-Path $ConfigPath) {
+        return [pscustomobject]@{
+            Exists   = $true
+            Created  = $false
+            Path     = $ConfigPath
+            Message  = "config.json already exists"
+        }
+    }
+
+    $templatePath = Join-Path (Split-Path $ConfigPath -Parent) "config.json.template"
+    if (-not (Test-Path $templatePath)) {
+        throw "config.json.template が見つかりません: $templatePath"
+    }
+
+    if ($PreviewOnly) {
+        return [pscustomobject]@{
+            Exists   = $false
+            Created  = $false
+            Path     = $ConfigPath
+            Message  = "config.json would be created from config.json.template"
+        }
+    }
+
+    Copy-Item -Path $templatePath -Destination $ConfigPath -Force
+    Write-Host "[SETUP] config.json を config.json.template から作成しました。" -ForegroundColor Green
+    Write-Host "        必要に応じて config\config.json を編集してください:" -ForegroundColor Yellow
+    Write-Host "          projectsDir : プロジェクトルートディレクトリ" -ForegroundColor Yellow
+    Write-Host "          linuxHost   : Linux ホスト名（SSH接続時）" -ForegroundColor Yellow
+    Write-Host ""
+
+    return [pscustomobject]@{
+        Exists   = $false
+        Created  = $true
+        Path     = $ConfigPath
+        Message  = "config.json created from config.json.template"
+    }
+}
+
 $bootstrapSucceeded = $false
 $config = $null
 $configPath = $null
@@ -324,6 +370,12 @@ try {
     Write-BootstrapBanner
 
     $configPath = Get-StartupConfigPath -StartupRoot $script:StartupRoot
+    $configResult = Initialize-BootstrapConfig -ConfigPath $configPath -PreviewOnly:$DryRun
+    Write-Host ("Config: {0}" -f $configResult.Message) -ForegroundColor $(
+        if ($configResult.Created) { "Green" }
+        elseif ($configResult.Exists) { "DarkGray" }
+        else { "Yellow" }
+    )
     $config = Import-LauncherConfig -ConfigPath $configPath
     Start-SessionLog -Config $config -ProjectName (Get-BootstrapLogProjectName) -ToolName "codex-bootstrap" | Out-Null
     Assert-StartupConfigSchema -ConfigPath $configPath | Out-Null
