@@ -795,12 +795,15 @@ function Invoke-LaunchAction {
         }
 
         # SSH ls 出力が CRLF を含む場合に備え Trim() でパスをクリーンにする
-        # bash -l でログインシェルを起動 → .profile/.bash_profile が読まれ npm PATH が設定される
-        # exec でシェルを codex プロセスに置き換えることで PTY が直接継承される
+        # bash -l -i でインタラクティブ・ログインシェルを起動:
+        #   -l: .bash_profile を読み npm/nvm PATH を設定
+        #   -i: インタラクティブモード → PTY を制御端末(/dev/tty)として取得
+        #       React-Ink 系 TUI(codex 等)は /dev/tty を直接開くため -i 必須
+        # exec でシェルを codex プロセスに置き換え PTY オーナーを codex に移す
         $cleanPath   = $remotePath.Trim()
         $toolArgsStr = ($toolArgs | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) -join ' '
         $innerCmd    = ('cd "' + $cleanPath + '" && exec ' + $cmd + ' ' + $toolArgsStr).TrimEnd()
-        $remoteCmd   = "bash -l -c '$innerCmd'"
+        $remoteCmd   = "bash -l -i -c '$innerCmd'"
 
         Write-Host ("  SSH 接続: {0} -> {1}" -f $linuxHost, $cleanPath) -ForegroundColor Cyan
         Write-Host ("  コマンド: {0}" -f $innerCmd) -ForegroundColor DarkGray
