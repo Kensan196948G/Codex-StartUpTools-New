@@ -806,7 +806,7 @@ function Invoke-LaunchAction {
         $remoteCmd   = ($profileSrc + '; cd "' + $cleanPath + '" && exec ' + $cmd + ' ' + $toolArgsStr).TrimEnd()
 
         Write-Host ("  SSH 接続: {0} -> {1}" -f $linuxHost, $cleanPath) -ForegroundColor Cyan
-        Write-Host ("  コマンド: {0}" -f $innerCmd) -ForegroundColor DarkGray
+        Write-Host ("  コマンド: {0}" -f $remoteCmd) -ForegroundColor DarkGray
         Write-Host ""
 
         # ssh -t $host "bash -l -c '...'" — ログイン環境 + PTY で起動
