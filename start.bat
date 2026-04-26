@@ -29,8 +29,8 @@ if %errorLevel% NEQ 0 (
 )
 
 :: 起動スクリプトの確認
-if not exist "scripts\main\Start-Codex.ps1" (
-    echo [ERROR] scripts\main\Start-Codex.ps1 が見つかりません。
+if not exist "scripts\main\Start-Menu.ps1" (
+    echo [ERROR] scripts\main\Start-Menu.ps1 が見つかりません。
     echo         リポジトリが正しくクローンされているか確認してください。
     pause
     exit /b 1
@@ -89,7 +89,7 @@ echo  起動時刻    : %DATE% %TIME%
 echo.
 
 pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass ^
-     -File "scripts\main\Start-Codex.ps1"
+     -File "scripts\main\Start-Menu.ps1"
 
 set EXIT_CODE=%errorLevel%
 
