@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop, 'feature/**']
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Pester Unit Tests
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Pester
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -MinimumVersion 5.0 -Force -SkipPublisherCheck
+
+      - name: Run Unit Tests
+        shell: pwsh
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = "tests/unit"
+          $config.Output.Verbosity = "Detailed"
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = "testResults.xml"
+          $config.TestResult.OutputFormat = "NUnitXml"
+          $result = Invoke-Pester -Configuration $config -PassThru
+          if ($result.FailedCount -gt 0) {
+            Write-Error "Tests failed: $($result.FailedCount) failure(s)"
+            exit 1
+          }
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: testResults.xml
+
+  lint:
+    name: PowerShell Lint (PSScriptAnalyzer)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module PSScriptAnalyzer -Force -SkipPublisherCheck
+
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          $results = Invoke-ScriptAnalyzer -Path scripts/ -Recurse -Severity Error,Warning
+          if ($results.Count -gt 0) {
+            $results | Format-Table -AutoSize
+            Write-Warning "$($results.Count) PSScriptAnalyzer finding(s)"
+          } else {
+            Write-Host "PSScriptAnalyzer: No issues found" -ForegroundColor Green
+          }
+
+  schema-validation:
+    name: Schema Validation
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate state.json.example
+        shell: pwsh
+        run: |
+          $example = Get-Content state.json.example -Raw | ConvertFrom-Json
+          $schema  = Get-Content state.schema.json  -Raw | ConvertFrom-Json
+          Write-Host "state.json.example is valid JSON" -ForegroundColor Green
+
+      - name: Validate config template
+        shell: pwsh
+        run: |
+          $config = Get-Content config/config.json.template -Raw | ConvertFrom-Json
+          Write-Host "config.json.template is valid JSON" -ForegroundColor Green
