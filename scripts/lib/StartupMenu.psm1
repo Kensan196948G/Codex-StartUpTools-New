@@ -791,11 +791,11 @@ function Invoke-LaunchAction {
         }
 
         # SSH ls 出力が CRLF を含む場合に備え Trim() でパスをクリーンにする
-        # bash -l -c でログインシェルを起動 → .profile/.bash_profile が読まれ
-        # npm/nvm 等でインストールした codex が PATH に含まれる
+        # bash -l でログインシェルを起動 → .profile/.bash_profile が読まれ npm PATH が設定される
+        # exec でシェルを codex プロセスに置き換えることで PTY が直接継承される
         $cleanPath   = $remotePath.Trim()
         $toolArgsStr = ($toolArgs | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) -join ' '
-        $innerCmd    = ('cd "' + $cleanPath + '" && ' + $cmd + ' ' + $toolArgsStr).TrimEnd()
+        $innerCmd    = ('cd "' + $cleanPath + '" && exec ' + $cmd + ' ' + $toolArgsStr).TrimEnd()
         $remoteCmd   = "bash -l -c '$innerCmd'"
 
         Write-Host ("  SSH 接続: {0} -> {1}" -f $linuxHost, $cleanPath) -ForegroundColor Cyan
