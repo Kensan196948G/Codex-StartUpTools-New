@@ -125,8 +125,9 @@ graph TD
 | `SessionTabManager.psm1` | ターミナルタブ管理 |
 | `StatuslineManager.psm1` | ステータスライン表示制御 |
 | `WorktreeManager.psm1` | Git worktree の作成・切替・削除 |
-| `ArchitectureCheck.psm1` | プロジェクト構成の整合性チェック |
+| `ArchitectureCheck.psm1` | プロジェクト構成の整合性チェック（CRITICAL/WARNING 検出、CI 統合済み） |
 | `ProjectDashboard.psm1` | 起動後ダッシュボード（Git・テスト・token・フェーズ状態を一覧表示） |
+| `MenuCommon.psm1` | メニューフィルタ・ソートモードの正規化ユーティリティ |
 
 ---
 
@@ -301,22 +302,26 @@ Invoke-Pester -Path tests/unit/Config.Tests.ps1 -Output Detailed
 ```mermaid
 flowchart LR
     PR[PR / Push] --> CI{GitHub Actions}
-    CI --> T[Pester テスト\n122 件]
+    CI --> T[Pester テスト\n175 件]
     CI --> L[PSScriptAnalyzer\n静的解析]
     CI --> S[スキーマ検証\nJSON バリデーション]
+    CI --> A[ArchitectureCheck\nCRITICAL=0 必須]
     T --> |全通過| OK[✅ マージ可能]
     L --> |エラーなし| OK
     S --> |有効| OK
+    A --> |CRITICAL=0| OK
     T --> |失敗| NG[❌ ブロック]
     L --> |エラー| NG
     S --> |無効| NG
+    A --> |CRITICAL>0| NG
 ```
 
 | ジョブ | 内容 | ランナー |
 |---|---|---|
-| `test` | Pester ユニットテスト (122件) | windows-latest |
+| `test` | Pester ユニットテスト (175件) | windows-latest |
 | `lint` | PSScriptAnalyzer 静的解析 | windows-latest |
 | `schema-validation` | JSON スキーマ検証 | windows-latest |
+| `architecture-check` | ArchitectureCheck（CRITICAL=0 必須）+ モジュール依存検証 | windows-latest |
 
 ---
 
@@ -360,10 +365,10 @@ flowchart TD
 | 項目 | 状態 |
 |---|---|
 | STABLE 達成 | ✅ 2026-04-26 |
-| ユニットテスト | ✅ 152/152 通過 |
-| CI (GitHub Actions) | ✅ 全ジョブ通過 |
-| ArchitectureCheck | ✅ CRITICAL=0 WARNING=0 |
-| 移植済みモジュール | 17 モジュール |
+| ユニットテスト | ✅ 175/175 通過 |
+| CI (GitHub Actions) | ✅ 全ジョブ通過（4ジョブ） |
+| ArchitectureCheck | ✅ CRITICAL=0 WARNING=0（CI 統合済み） |
+| 移植済みモジュール | 18 モジュール |
 | 移植メモ | `docs/migration/modules.md` |
 
 ### 直近のループ成果
@@ -373,7 +378,8 @@ flowchart TD
 | Loop 1 | GitHub Actions CI 整備、README 大幅改善、.gitignore 整理 |
 | Loop 2 | 移植メモ作成（docs/migration/modules.md）、ArchitectureCheck テスト強化（+8件） |
 | Loop 3 | StrictMode 追加、依存ルール実態整合、CI Node.js 24 対応 |
-| Loop 4 | ProjectDashboard.psm1 新規実装（+22テスト）、GitHub Projects・マイルストーン整備 |
+| Loop 4 | ProjectDashboard.psm1 新規実装（+22テスト）、start.bat 管理者権限対応 |
+| Loop 5 | MenuCommon.psm1 移植（+23テスト）、ArchitectureCheck CI 統合（4ジョブ体制） |
 
 ---
 

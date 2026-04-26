@@ -94,3 +94,43 @@ jobs:
         run: |
           $config = Get-Content config/config.json.template -Raw | ConvertFrom-Json
           Write-Host "config.json.template is valid JSON" -ForegroundColor Green
+
+  architecture-check:
+    name: Architecture Check (scripts/)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run ArchitectureCheck
+        shell: pwsh
+        run: |
+          Import-Module .\scripts\lib\ArchitectureCheck.psm1 -Force
+          $result = Invoke-ArchitectureCheck -Path '.\scripts'
+          Write-Host ("Files checked : {0}" -f $result.CheckedFiles)
+          Write-Host ("CRITICAL      : {0}" -f $result.CriticalCount)
+          Write-Host ("WARNING       : {0}" -f $result.WarningCount)
+          Write-Host ("Passed        : {0}" -f $result.Passed)
+          if ($result.Violations.Count -gt 0) {
+            $result.Violations | Select-Object RuleId,Severity,File,Line | Format-Table -AutoSize
+          }
+          if (-not $result.Passed) {
+            Write-Error "ArchitectureCheck FAILED: $($result.CriticalCount) CRITICAL violation(s)"
+            exit 1
+          }
+          Write-Host "ArchitectureCheck PASSED" -ForegroundColor Green
+
+      - name: Verify module dependencies
+        shell: pwsh
+        run: |
+          Import-Module .\scripts\lib\ArchitectureCheck.psm1 -Force
+          $results = @(Test-ModuleDependency -Path '.')
+          if ($results.Count -gt 0) {
+            $results | Format-Table -AutoSize
+            $missing = @($results | Where-Object { $_.Status -eq "MISSING" })
+            if ($missing.Count -gt 0) {
+              Write-Warning "$($missing.Count) module dependency issue(s) found"
+            }
+          }
+          Write-Host "Module dependency check complete" -ForegroundColor Green
