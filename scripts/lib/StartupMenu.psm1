@@ -814,10 +814,19 @@ function Invoke-LaunchAction {
         $wt = Get-Command wt -ErrorAction SilentlyContinue
         if ($null -ne $wt) {
             # Windows Terminal が利用可能: 同ウィンドウの新規タブで非同期起動
-            # wt の ConPTY が各タブに独立したターミナルを提供し TUI が正常描画される
-            # remote command の ; を && に統一し wt の ; コマンド区切り解析を回避済み
-            $tabTitle = if ($project) { "Codex: $project" } else { 'Codex SSH' }
-            $wtArgList = @('new-tab', '--title', $tabTitle, '--', 'ssh') + $sshArgList
+            # wt は --title の値や ; / && / " を含む引数を誤解析する場合があるため
+            # temp スクリプトに SSH 呼び出しを書き出し pwsh -File で実行する
+            # -w last: 現在フォーカス中の WT ウィンドウの新規タブで開く
+            $tabTitle  = if ($project) { "Codex: $project" } else { 'Codex SSH' }
+            $tmpScript = Join-Path $env:TEMP 'codex_ssh_launch.ps1'
+            @(
+                "& ssh $($sshOptions -join ' ') '$linuxHost' @'"
+                $remoteCmd
+                "'@"
+                'Remove-Item -LiteralPath $PSCommandPath -ErrorAction SilentlyContinue'
+            ) | Set-Content -Path $tmpScript -Encoding UTF8
+            $wtArgList = @('-w', 'last', 'new-tab', '--title', $tabTitle,
+                           '--', 'pwsh', '-NoLogo', '-NoProfile', '-File', $tmpScript)
             Start-Process -FilePath $wt.Source -ArgumentList $wtArgList
             Write-Host "  新しいタブで起動しました。" -ForegroundColor Green
             Write-Host "  (タブを閉じるとセッションが終了します)" -ForegroundColor DarkGray
