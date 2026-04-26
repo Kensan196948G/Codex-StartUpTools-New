@@ -795,15 +795,15 @@ function Invoke-LaunchAction {
         }
 
         # SSH ls 出力が CRLF を含む場合に備え Trim() でパスをクリーンにする
-        # bash -l -i でインタラクティブ・ログインシェルを起動:
-        #   -l: .bash_profile を読み npm/nvm PATH を設定
-        #   -i: インタラクティブモード → PTY を制御端末(/dev/tty)として取得
-        #       React-Ink 系 TUI(codex 等)は /dev/tty を直接開くため -i 必須
-        # exec でシェルを codex プロセスに置き換え PTY オーナーを codex に移す
+        # SSH デーモンが起動する bash がセッションリーダーかつ PTY の制御端末オーナー。
+        # bash -l -i -c などでネストすると子 bash はセッションリーダーになれず
+        # React-Ink TUI が /dev/tty を開けない。
+        # プロファイルを直接 source して exec することで SSH の bash がそのまま
+        # codex に置き換わり、/dev/tty が正しく引き継がれる。
         $cleanPath   = $remotePath.Trim()
         $toolArgsStr = ($toolArgs | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) -join ' '
-        $innerCmd    = ('cd "' + $cleanPath + '" && exec ' + $cmd + ' ' + $toolArgsStr).TrimEnd()
-        $remoteCmd   = "bash -l -i -c '$innerCmd'"
+        $profileSrc  = 'export TERM=xterm-256color; . ~/.bash_profile 2>/dev/null; . ~/.bashrc 2>/dev/null'
+        $remoteCmd   = ($profileSrc + '; cd "' + $cleanPath + '" && exec ' + $cmd + ' ' + $toolArgsStr).TrimEnd()
 
         Write-Host ("  SSH 接続: {0} -> {1}" -f $linuxHost, $cleanPath) -ForegroundColor Cyan
         Write-Host ("  コマンド: {0}" -f $innerCmd) -ForegroundColor DarkGray
